@@ -21,20 +21,20 @@ library(wordcloud)
 # database-systematic map
 data <- read.csv("data/database_selected.csv")
 
-# # national MPA
-# MPA_med_national <-
-#   st_read("data/MPAnational_5m.gpkg", quiet = T) %>%
-#   st_transform('+proj=longlat +datum=WGS84')
-#
-# # Nature 2000 site
-# MPA_med_NATURA2000 <-
-#   st_read("data/Nature2000_5m.gpkg", quiet = T) %>%
-#   st_transform('+proj=longlat +datum=WGS84')
-#
-# # Proposed Natura 2000 site
-# MPA_med_pNATURA2000 <-
-#   st_read("data/PropNature2000_5m.gpkg", quiet = T) %>%
-#   st_transform('+proj=longlat +datum=WGS84')
+# national MPA
+MPA_med_national <-
+  st_read("data/MPAnational_5m.gpkg", quiet = T) %>%
+  st_transform('+proj=longlat +datum=WGS84')
+
+# Nature 2000 site
+MPA_med_NATURA2000 <-
+  st_read("data/Nature2000_5m.gpkg", quiet = T) %>%
+  st_transform('+proj=longlat +datum=WGS84')
+
+# Proposed Natura 2000 site
+MPA_med_pNATURA2000 <-
+  st_read("data/PropNature2000_5m.gpkg", quiet = T) %>%
+  st_transform('+proj=longlat +datum=WGS84')
 
 
 # shiny-ui ----------------------------------------------------------------
@@ -99,6 +99,38 @@ ui <- fluidPage(
             "site_type",
             "Select by Site Type",
             choices = levels(factor(data$site_type)),
+            selected = NULL,
+            multiple = TRUE
+          ),
+          
+          selectInput(
+            "country",
+            "Select by Country",
+            choices = levels(factor(data$country)),
+            selected = NULL,
+            multiple = TRUE
+          ),
+          
+          selectInput(
+            "target_category",
+            "Select by Target Category",
+            choices = levels(factor(data$target_cat)),
+            selected = NULL,
+            multiple = TRUE
+          ),
+          
+          selectInput(
+            "bio_target",
+            "Select by Biological Target Category",
+            choices = levels(factor(data$bio_target)),
+            selected = NULL,
+            multiple = TRUE
+          ),
+          
+          selectInput(
+            "bio_response",
+            "Select by Biological Response",
+            choices = levels(factor(data$bio_response)),
             selected = NULL,
             multiple = TRUE
           ),
@@ -206,31 +238,29 @@ ui <- fluidPage(
   )
 )
 
-
-
 # shiny-server ------------------------------------------------------------
 
 server <- function(input, output, session) {
   # prepare the text for the label
   
-  # mylabels_MPA <- paste(
-  #   "Country: ", MPA_med_national$ISO3,"<br/>",
-  #   "National Marine Protected Area", "<br/>",
-  #   "Name: ", MPA_med_national$NAME, "<br/>") %>%
-  #   lapply(htmltools::HTML)
-  #
-  # mylabels_Nat2000 <- paste(
-  #   "Country: ", MPA_med_NATURA2000$ISO3,"<br/>",
-  #   "Nature2000 area", "<br/>",
-  #   "Name: ", MPA_med_NATURA2000$NAME, "<br/>") %>%
-  #   lapply(htmltools::HTML)
-  #
-  # mylabels_pNat2000 <- paste(
-  #   "Country: ", MPA_med_pNATURA2000$ISO3,"<br/>",
-  #   "Proposed Nature2000 area", "<br/>",
-  #   "Name: ", MPA_med_pNATURA2000$NAME, "<br/>") %>%
-  #   lapply(htmltools::HTML)
-  #
+  mylabels_MPA <- paste(
+    "<b>", "National Marine Protected Area", "</b>", "<br/>",
+    "<b>", "Country: ", "</b>", MPA_med_national$ISO3,"<br/>",
+    "<b>", "Name: ", "</b>", MPA_med_national$NAME, "<br/>") %>%
+    lapply(htmltools::HTML)
+
+  mylabels_Nat2000 <- paste(
+    "<b>", "Nature2000 area", "</b>", "<br/>",
+    "<b>", "Country: ", "</b>", MPA_med_NATURA2000$ISO3,"<br/>",
+    "<b>", "Name: ", "</b>", MPA_med_NATURA2000$NAME, "<br/>") %>%
+    lapply(htmltools::HTML)
+
+  mylabels_pNat2000 <- paste(
+    "<b>", "Proposed Nature2000 area", "</b>", "<br/>",
+    "<b>", "Country: ", "</b>", MPA_med_pNATURA2000$ISO3,"<br/>",
+    "<b>", "Name: ", "</b>", MPA_med_pNATURA2000$NAME, "<br/>") %>%
+    lapply(htmltools::HTML)
+
   
   # Create the map
   output$map <-
@@ -241,38 +271,38 @@ server <- function(input, output, session) {
         setView(15, 37, zoom = 4.5) %>%
         addMeasure(position = "bottomleft") %>%
         # # MPA
-        # addPolygons(data = MPA_med_national,
-        #           color = "green",
-        #           stroke = T,
-        #           weight = 1,
-        #           label = mylabels_MPA,
-        #           labelOptions = labelOptions(
-        #             style = list("font-weight" = "normal", padding = "3px 8px"),
-        #             textsize = "11px",
-        #             direction = "auto"),
-        #           group = "MPA (green)") %>%
+        addPolygons(data = MPA_med_national,
+                  color = "green",
+                  stroke = T,
+                  weight = 1,
+                  label = mylabels_MPA,
+                  labelOptions = labelOptions(
+                    style = list("font-weight" = "normal", padding = "3px 8px"),
+                    textsize = "11px",
+                    direction = "auto"),
+                  group = "MPA (green)") %>%
       # # Nature 2000
-      # addPolygons(data = MPA_med_NATURA2000,
-      #             color = "orange",
-      #             stroke = T,
-      #             weight = 1,
-      #             label = mylabels_Nat2000,
-      #             labelOptions = labelOptions(
-      #               style = list("font-weight" = "normal", padding = "3px 8px"),
-      #               textsize = "11px",
-      #               direction = "auto"),
-      #             group = "Nature 2000 (orange)") %>%
+      addPolygons(data = MPA_med_NATURA2000,
+                  color = "orange",
+                  stroke = T,
+                  weight = 1,
+                  label = mylabels_Nat2000,
+                  labelOptions = labelOptions(
+                    style = list("font-weight" = "normal", padding = "3px 8px"),
+                    textsize = "11px",
+                    direction = "auto"),
+                  group = "Nature 2000 (orange)") %>%
       # # Proposed Nature 2000
-      # addPolygons(data = MPA_med_pNATURA2000,
-      #             color = "grey",
-      #             stroke = T,
-      #             weight = 1,
-      #             label = mylabels_pNat2000,
-      #             labelOptions = labelOptions(
-      #               style = list("font-weight" = "normal", padding = "3px 8px"),
-      #               textsize = "11px",
-      #               direction = "auto"),
-      #             group = "Proposed Nature 2000 (grey)") %>%
+      addPolygons(data = MPA_med_pNATURA2000,
+                  color = "grey",
+                  stroke = T,
+                  weight = 1,
+                  label = mylabels_pNat2000,
+                  labelOptions = labelOptions(
+                    style = list("font-weight" = "normal", padding = "3px 8px"),
+                    textsize = "11px",
+                    direction = "auto"),
+                  group = "Proposed Nature 2000 (grey)") %>%
       # Layers control
       addLayersControl(
         overlayGroups = c(
