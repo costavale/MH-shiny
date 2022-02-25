@@ -231,8 +231,11 @@ ui <- fluidPage(
                
                hr(),
                includeMarkdown("inst/Rmarkdown/about-MH.Rmd")               
-             ))
+             )),
     
+    tabPanel("View Code",
+             href = "https://github.com/costavale/BlueCarbon",
+             icon = shiny::icon("github"))
     
   )
 )
@@ -314,12 +317,12 @@ server <- function(input, output, session) {
       )
     })
   
-  ## Selected Area
+  ## Selection
   
   output$selected_area_1 <- output$selected_area_2 <-
     
     renderPrint({
-      HTML(paste0("You have selected: ", "<b>", input$area, "</b>"))
+      HTML(paste0("Selection: ", "<b>", input$area, "</b>"))
     })
   
   ## Selected Site
@@ -327,7 +330,7 @@ server <- function(input, output, session) {
   output$selected_site_1 <- output$selected_site_2 <-
     
     renderPrint({
-      HTML(paste0("You have selected: ", "<b>", input$site, "</b>"))
+      HTML(paste0("Selection: ", "<b>", input$site, "</b>"))
       
     })
   
@@ -336,7 +339,7 @@ server <- function(input, output, session) {
   output$selected_site_type_1 <- output$selected_site_type_2 <-
     
     renderPrint({
-      HTML(paste0("You have selected: ", "<b>", input$site_type, "</b>"))
+      HTML(paste0("Selection: ", "<b>", input$site_type, "</b>"))
     })
   
   ## Subset data
@@ -346,7 +349,11 @@ server <- function(input, output, session) {
       data %>%
       filter(site %in% input$site |
                area %in% input$area |
-               site_type %in% input$site_type)
+               site_type %in% input$site_type |
+               country %in% input$country |
+               target_cat %in% input$target_cat |
+               bio_target %in% input$bio_target |
+               bio_response %in% input$bio_response)
     
     data_selected
     
@@ -432,34 +439,6 @@ server <- function(input, output, session) {
     
   })
   
-  # graph-03
-  
-  output$bio_resp <- renderPlot({
-    data_selected() %>%
-      filter(target_cat == "biological") %>%
-      ggplot() +
-      geom_histogram(aes(x = avg_depth,
-                         fill = bio_response),
-                     color = "black") +
-      scale_fill_brewer(palette = "RdYlGn") +
-      labs(x = NULL,
-           y = "# of observations",
-           title = "Observations per biological response") +
-      guides(
-        fill = guide_legend(
-          title = "Biological response",
-          ncol = 4,
-          title.position = "top",
-          title.theme = element_text(face = "bold",
-                                     size = 11)
-        )
-      ) +
-      theme_bw() +
-      theme(legend.position = "bottom",
-            text = element_text(size = 11))
-    
-  })
-  
   # tidy_words dataset
   
   tidy_words <- reactive({
@@ -520,6 +499,34 @@ server <- function(input, output, session) {
         theme(legend.position = "none")
     })
   
+  # observeEvent - input$area
+  
+  observeEvent(input$area, {
+    if (input$area != "")
+    {
+      colorData_area <- data[data$area %in% input$area, ]
+      pal_area <- colorFactor("plasma", levels = colorData_area)
+      
+      leafletProxy("map") %>%
+        addCircleMarkers(
+          data = data_selected(),
+          lng = ~ Longitude,
+          lat = ~ Latitude,
+          stroke = T,
+          color = "white",
+          weight = 0.2,
+          fillColor = ~ pal_area(colorData_area),
+          popup = ~htmlEscape(Longitude),
+          popupOptions = popupOptions(maxWidth = "100%", closeOnClick = TRUE),
+          label = ~ as.character(site),
+          labelOptions = labelOptions(
+            style = list("font-weight" = "normal", padding = "3px 8px"),
+            textsize = "11px",
+            direction = "auto"
+          )
+        )
+    }
+  })
   
   # observeEvent - input$site
   
@@ -582,13 +589,14 @@ server <- function(input, output, session) {
     }
   })
   
-  # observeEvent - input$int_area
+  # observeEvent - input$country
   
-  observeEvent(input$area, {
-    if (input$area != "")
+  observeEvent(input$country, {
+    if (input$country != "")
     {
-      colorData_area <- data[data$area %in% input$area, ]
-      pal_area <- colorFactor("plasma", levels = colorData_area)
+      colorData_country <- data[data$country %in% input$country, ]
+      pal_type <-
+        colorFactor("inferno", levels = colorData_country)
       
       leafletProxy("map") %>%
         addCircleMarkers(
@@ -598,8 +606,8 @@ server <- function(input, output, session) {
           stroke = T,
           color = "white",
           weight = 0.2,
-          fillColor = ~ pal_area(colorData_area),
-          popup = ~htmlEscape(Longitude),
+          fillColor = ~ pal_type(colorData_country),
+          popup = ~htmlEscape(country),
           popupOptions = popupOptions(maxWidth = "100%", closeOnClick = TRUE),
           label = ~ as.character(site),
           labelOptions = labelOptions(
@@ -614,9 +622,15 @@ server <- function(input, output, session) {
   # observeEvent - input$int_clear
   
   observeEvent(input$int_clear, {
+    
     updateSelectInput(session, "site", selected = "")
     updateSelectInput(session, "site_type", selected = "")
     updateSelectInput(session, "area", selected = "")
+    updateSelectInput(session, "country", selected = "")
+    updateSelectInput(session, "target_cat", selected = "")
+    updateSelectInput(session, "bio_target", selected = "")
+    updateSelectInput(session, "bio_response", selected = "")
+    
     leafletProxy("map") %>% clearMarkers()
     
   })
