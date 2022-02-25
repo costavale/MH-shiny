@@ -51,9 +51,8 @@ ui <- fluidPage(
                class = "outer",
                
                hr(),
-               h3("TO ADD THE VIGNETTE or a README to explain how to use the shiny app"),
-               
-               
+               includeMarkdown("inst/Rmarkdown/about-MH.Rmd")               
+
              )),
     
     # tabpanel Interactive map

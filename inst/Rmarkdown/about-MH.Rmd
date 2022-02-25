@@ -3,26 +3,14 @@ title: "about-MH"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
+## MH-shiny: Marine Hazard web application
 
-## R Markdown
+**MH-shiny** is an Open Source tool created within the framework of the Marine Hazard project.
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+The central objective of the project is the creation of an integrated system of skills on the territory able to deal with relevant aspects regarding environmental risk -- with a specific focus on the marine-coastal system -- in a modern and effective way.
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+The results obtained, through four specific areas of action, aim at the construction of technological prototypes for the management of the hazard in the coastal marine environment in the areas of interest of the project. Marine Hazard will therefore lead to the creation of skills on the territory capable of effectively addressing relevant aspects of risk mitigation in the marine environment.
 
-```{r cars}
-summary(cars)
-```
+The four specific actions of the project represent a wide range of fields of action of significant strategic interest for the development of entire supply chains of the economy of the sea being an example for the development of strategic activities in areas of mitigation and recovery of marine environments degraded by natural and anthropic impact phenomena.
 
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+For more details about the project see <http://www.marinehazard.cnr.it>.
