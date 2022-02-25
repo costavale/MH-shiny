@@ -163,16 +163,13 @@ ui <- fluidPage(
         ),
         hr(),
         h2("List of scientific items"),
-        fillPage(
-          fillRow(
-          fillCol(reactableOutput("table01")),
-          fillCol(
-            plotOutput("target_cat", height = "100%"),
-            plotOutput("bio_target", height = "100%"),
-          ), 
-          flex = c(3.5, 1.5)
-          
-        ))
+        
+        fluidRow(
+          column(9, reactableOutput("table01")),
+          column(3, plotOutput("target_cat", height = "40vh"),
+                      plotOutput("bio_target", height = "40vh"))
+        )
+        
       )
     ),
     
