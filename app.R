@@ -51,7 +51,7 @@ ui <- fluidPage(
                class = "outer",
                
                hr(),
-               includeMarkdown("inst/Rmarkdown/about-MH.Rmd")               
+               includeMarkdown("inst/Rmarkdown/home-MH.Rmd")               
 
              )),
     
