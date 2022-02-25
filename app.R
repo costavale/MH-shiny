@@ -44,8 +44,8 @@ ui <- fluidPage(
   
   navbarPage(
     "Marine Hazard",
-    id = "nav",
-    
+
+    # tabpanel HOME
     tabPanel("Home",
              div(
                class = "outer",
@@ -56,6 +56,7 @@ ui <- fluidPage(
                
              )),
     
+    # tabpanel Interactive map
     tabPanel(
       "Interactive map",
       div(
@@ -148,6 +149,7 @@ ui <- fluidPage(
       )
     ),
     
+    # tabpanel data explorer
     tabPanel(
       "Data Explorer",
       div(
@@ -161,18 +163,20 @@ ui <- fluidPage(
         ),
         hr(),
         h2("List of scientific items"),
-        fillRow(
+        fillPage(
+          fillRow(
           fillCol(reactableOutput("table01")),
           fillCol(
             plotOutput("target_cat", height = "100%"),
             plotOutput("bio_target", height = "100%"),
-            plotOutput("bio_resp", height = "100%")
-          )
+          ), 
+          flex = c(3.5, 1.5)
           
-        )
+        ))
       )
     ),
     
+    # tabpanel keywords analysis
     tabPanel(
       "Keywords analysis",
       div(
@@ -224,14 +228,13 @@ ui <- fluidPage(
       )
     ),
     
+    # tabpanel about
     tabPanel("About",
              div(
                class = "outer",
                
                hr(),
-               h3("ADD info about the project, acknowledgement and the different packages used in the app  "),
-               
-               
+               includeMarkdown("inst/Rmarkdown/about-MH.Rmd")               
              ))
     
     
@@ -346,7 +349,8 @@ server <- function(input, output, session) {
     data_selected <-
       data %>%
       filter(site %in% input$site |
-               area %in% input$area | site_type %in% input$site_type)
+               area %in% input$area |
+               site_type %in% input$site_type)
     
     data_selected
     
@@ -360,7 +364,7 @@ server <- function(input, output, session) {
       distinct(doi, .keep_all = T)
     
     reactable(
-      table_selected[c(3:6, 8)],
+      table_selected[c(1:4, 6)],
       columns = list(
         author = colDef(name = "Authors"),
         title = colDef(name = "Title"),
@@ -627,6 +631,7 @@ server <- function(input, output, session) {
     updateSelectInput(session, "selection", selected = "")
     
   })
+  
   
 }
 
