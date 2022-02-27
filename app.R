@@ -45,7 +45,7 @@ ui <- fluidPage(
   navbarPage(
     "Marine Hazard",
 
-    # tabpanel HOME
+    ## tabpanel HOME ----
     tabPanel("Home",
              div(
                class = "outer",
@@ -55,7 +55,7 @@ ui <- fluidPage(
 
              )),
     
-    # tabpanel Interactive map
+    ## tabpanel Interactive map ----
     tabPanel(
       "Interactive map",
       div(
@@ -148,7 +148,7 @@ ui <- fluidPage(
       )
     ),
     
-    # tabpanel data explorer
+    ## tabpanel Data explorer ----
     tabPanel(
       "Data Explorer",
       div(
@@ -164,7 +164,8 @@ ui <- fluidPage(
         h2("List of scientific items"),
         
         fluidRow(
-          column(9, reactableOutput("table01")),
+          column(9, reactableOutput("table01"),
+                 downloadButton("download")),
           column(3, plotOutput("target_cat", height = "40vh"),
                       plotOutput("bio_target", height = "40vh"))
         )
