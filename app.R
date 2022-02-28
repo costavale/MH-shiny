@@ -40,6 +40,7 @@ MPA_med_pNATURA2000 <-
 # shiny-ui ----------------------------------------------------------------
 
 ui <- fluidPage(
+  
   theme = shinytheme("simplex"),
   
   navbarPage(
@@ -76,7 +77,7 @@ ui <- fluidPage(
           left = "auto",
           right = 20,
           bottom = "auto",
-          width = 300,
+          width = 280,
           height = "auto",
           
           selectInput(
@@ -156,9 +157,7 @@ ui <- fluidPage(
         
         hr(),
         fluidRow(
-          column(3, htmlOutput("selected_area_1"), offset = 1),
-          column(3, htmlOutput("selected_site_1")),
-          column(3, htmlOutput("selected_site_type_1"))
+          column(3, htmlOutput("selection_1"), offset = 1),
         ),
         hr(),
         h2("List of scientific items"),
@@ -173,7 +172,7 @@ ui <- fluidPage(
       )
     ),
     
-    # tabpanel keywords analysis
+    ## tabpanel Keywords analysis ----
     tabPanel(
       "Keywords analysis",
       div(
@@ -181,9 +180,7 @@ ui <- fluidPage(
         
         hr(),
         fluidRow(
-          column(3, htmlOutput("selected_area_2"), offset = 1),
-          column(3, htmlOutput("selected_site_2")),
-          column(3, htmlOutput("selected_site_type_2"))
+          column(3, htmlOutput("selection_2"), offset = 1),
         ),
         hr(),
         h2("Word Cloud "),
@@ -225,18 +222,14 @@ ui <- fluidPage(
       )
     ),
     
-    # tabpanel about
+    ## tabpanel About ----
     tabPanel("About",
              div(
                class = "outer",
                
                hr(),
                includeMarkdown("inst/Rmarkdown/about-MH.Rmd")               
-             )),
-    
-    tabPanel("View Code",
-             href = "https://github.com/costavale/BlueCarbon",
-             icon = shiny::icon("github"))
+             ))
     
   )
 )
@@ -244,9 +237,9 @@ ui <- fluidPage(
 # shiny-server ------------------------------------------------------------
 
 server <- function(input, output, session) {
-  # prepare the text for the label
   
-  mylabels_MPA <- paste(
+  # prepare the text for map labels
+    mylabels_MPA <- paste(
     "<b>", "National Marine Protected Area", "</b>", "<br/>",
     "<b>", "Country: ", "</b>", MPA_med_national$ISO3,"<br/>",
     "<b>", "Name: ", "</b>", MPA_med_national$NAME, "<br/>") %>%
@@ -265,15 +258,15 @@ server <- function(input, output, session) {
     lapply(htmltools::HTML)
 
   
-  # Create the map
+  # Create the base-map
   output$map <-
     renderLeaflet({
       leaflet() %>%
-        # addTiles() %>%
         addProviderTiles(providers$CartoDB.Positron) %>%
         setView(15, 37, zoom = 4.5) %>%
         addMeasure(position = "bottomleft") %>%
-        # # MPA
+        
+        ## add MPA polygons
         addPolygons(data = MPA_med_national,
                   color = "green",
                   stroke = T,
@@ -284,18 +277,21 @@ server <- function(input, output, session) {
                     textsize = "11px",
                     direction = "auto"),
                   group = "MPA (green)") %>%
-      # # Nature 2000
+      
+        ## add Nature2000 polygons
       addPolygons(data = MPA_med_NATURA2000,
                   color = "orange",
                   stroke = T,
                   weight = 1,
                   label = mylabels_Nat2000,
                   labelOptions = labelOptions(
-                    style = list("font-weight" = "normal", padding = "3px 8px"),
+                    style = list("font-weight" = "normal", 
+                                 padding = "3px 8px"),
                     textsize = "11px",
                     direction = "auto"),
                   group = "Nature 2000 (orange)") %>%
-      # # Proposed Nature 2000
+      
+        ## add ProposedNature2000 polygons
       addPolygons(data = MPA_med_pNATURA2000,
                   color = "grey",
                   stroke = T,
@@ -306,7 +302,8 @@ server <- function(input, output, session) {
                     textsize = "11px",
                     direction = "auto"),
                   group = "Proposed Nature 2000 (grey)") %>%
-      # Layers control
+      
+        ## add Layers control
       addLayersControl(
         overlayGroups = c(
           "MPA (green)",
@@ -320,32 +317,22 @@ server <- function(input, output, session) {
   
   ## Selection
   
-  output$selected_area_1 <- output$selected_area_2 <-
+  output$selection_1 <- output$selection_2 <-
     
     renderPrint({
-      HTML(paste0("Selection: ", "<b>", input$area, "</b>"))
+      HTML(paste0("Selection: ", "<b>", 
+                  input$area, 
+                  ", ", input$site, 
+                  ", ", input$site_type,  
+                  "</b>"))
     })
   
-  ## Selected Site
-  
-  output$selected_site_1 <- output$selected_site_2 <-
-    
-    renderPrint({
-      HTML(paste0("Selection: ", "<b>", input$site, "</b>"))
-      
-    })
-  
-  ## Selected Site_type
-  
-  output$selected_site_type_1 <- output$selected_site_type_2 <-
-    
-    renderPrint({
-      HTML(paste0("Selection: ", "<b>", input$site_type, "</b>"))
-    })
-  
-  ## Subset data
+  ## create a filtered dataset
   
   data_selected <- reactive({
+    
+    
+    
     data_selected <-
       data %>%
       filter(site %in% input$site |
@@ -360,7 +347,7 @@ server <- function(input, output, session) {
     
   })
   
-  # table-01
+  # create a table of filtered dataset
   
   output$table01 <- renderReactable({
     table_selected <-
@@ -440,9 +427,10 @@ server <- function(input, output, session) {
     
   })
   
-  # tidy_words dataset
+  ## create the tidy_words dataset
   
   tidy_words <- reactive({
+    
     req(input$selection)
     
     tidy_words <-
@@ -500,11 +488,13 @@ server <- function(input, output, session) {
         theme(legend.position = "none")
     })
   
-  # observeEvent - input$area
+  ## observeEvent - input$area
   
   observeEvent(input$area, {
+    
     if (input$area != "")
-    {
+    
+      {
       colorData_area <- data[data$area %in% input$area, ]
       pal_area <- colorFactor("plasma", levels = colorData_area)
       
