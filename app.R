@@ -212,7 +212,7 @@ ui <- fluidPage(
               max = 300,
               value = 300
             ),
-            width = 4
+            width = 3
           ),
           
           # Show Word Cloud
