@@ -238,7 +238,7 @@ ui <- fluidPage(
 
 server <- function(input, output, session) {
   
-  # prepare the text for map labels
+  ## create the text for map labels ----
     mylabels_MPA <- paste(
     "<b>", "National Marine Protected Area", "</b>", "<br/>",
     "<b>", "Country: ", "</b>", MPA_med_national$ISO3,"<br/>",
@@ -258,7 +258,7 @@ server <- function(input, output, session) {
     lapply(htmltools::HTML)
 
   
-  # Create the base-map
+  ## create the base-map ----
   output$map <-
     renderLeaflet({
       leaflet() %>%
@@ -266,7 +266,7 @@ server <- function(input, output, session) {
         setView(15, 37, zoom = 4.5) %>%
         addMeasure(position = "bottomleft") %>%
         
-        ## add MPA polygons
+        ### add MPA polygons ----
         addPolygons(data = MPA_med_national,
                   color = "green",
                   stroke = T,
@@ -278,7 +278,7 @@ server <- function(input, output, session) {
                     direction = "auto"),
                   group = "MPA (green)") %>%
       
-        ## add Nature2000 polygons
+        ### add Nature2000 polygons ----
       addPolygons(data = MPA_med_NATURA2000,
                   color = "orange",
                   stroke = T,
@@ -291,7 +291,7 @@ server <- function(input, output, session) {
                     direction = "auto"),
                   group = "Nature 2000 (orange)") %>%
       
-        ## add ProposedNature2000 polygons
+        ### add ProposedNature2000 polygons ----
       addPolygons(data = MPA_med_pNATURA2000,
                   color = "grey",
                   stroke = T,
@@ -303,7 +303,7 @@ server <- function(input, output, session) {
                     direction = "auto"),
                   group = "Proposed Nature 2000 (grey)") %>%
       
-        ## add Layers control
+        ### add Layers control ----
       addLayersControl(
         overlayGroups = c(
           "MPA (green)",
@@ -315,7 +315,7 @@ server <- function(input, output, session) {
       )
     })
   
-  ## Selection
+  ## Selection ----
   
   output$selection_1 <- output$selection_2 <-
     
@@ -327,7 +327,7 @@ server <- function(input, output, session) {
                   "</b>"))
     })
   
-  ## create a filtered dataset ----
+  ## create a selected dataset ----
   
   data_selected <- reactive({
     
@@ -348,6 +348,8 @@ server <- function(input, output, session) {
   ## create a table of filtered data ----
   
   output$table01 <- renderReactable({
+    
+    req(data_selected)
     
     table_selected <-
       data_selected() %>%
@@ -383,9 +385,10 @@ server <- function(input, output, session) {
     }
   )
   
-  # graph-01
+  ## graph-01 ----
   
   output$target_cat <- renderPlot({
+    
     data_selected() %>%
       ggplot() +
       geom_histogram(aes(x = avg_depth, fill = target_cat),
@@ -409,9 +412,10 @@ server <- function(input, output, session) {
     
   })
   
-  # graph-02
+  ## graph-02 ----
   
   output$bio_target <- renderPlot({
+    
     data_selected() %>%
       filter(target_cat == "biological") %>%
       ggplot() +
@@ -438,7 +442,7 @@ server <- function(input, output, session) {
     
   })
   
-  ## create the tidy_words dataset
+  ## create the tidy_words dataset ----
   
   tidy_words <- reactive({
     
@@ -461,7 +465,7 @@ server <- function(input, output, session) {
     
   })
   
-  # wordcloud
+  ## wordcloud ----
   
   wordcloud_rep <- repeatable(wordcloud)
   
@@ -481,7 +485,7 @@ server <- function(input, output, session) {
     })
   
   
-  # Number of Words occurrence
+  ## Number of Words occurrence ----
   
   output$frequencies <-
     renderPlot({
@@ -561,7 +565,9 @@ server <- function(input, output, session) {
     }
   })
   
-  # observeEvent - input$site_type
+  ## observeEvent ----
+  
+  ### input$site_type ----
   
   observeEvent(input$site_type, {
     if (input$site_type != "")
@@ -591,7 +597,7 @@ server <- function(input, output, session) {
     }
   })
   
-  # observeEvent - input$country
+  ### input$country ----
   
   observeEvent(input$country, {
     if (input$country != "")
@@ -621,7 +627,7 @@ server <- function(input, output, session) {
     }
   })
   
-  # observeEvent - input$int_clear
+  ### input$int_clear ----
   
   observeEvent(input$int_clear, {
     
@@ -637,13 +643,12 @@ server <- function(input, output, session) {
     
   })
   
-  # observeEvent - input$update
+  ### input$update ----
   
   observeEvent(input$update, {
     updateSelectInput(session, "selection", selected = "")
     
   })
-  
   
 }
 
