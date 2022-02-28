@@ -164,7 +164,7 @@ ui <- fluidPage(
         
         fluidRow(
           column(9, reactableOutput("table01"),
-                 downloadButton("download")),
+                 downloadButton("download_filtered")),
           column(3, plotOutput("target_cat", height = "40vh"),
                       plotOutput("bio_target", height = "40vh"))
         )
@@ -327,11 +327,9 @@ server <- function(input, output, session) {
                   "</b>"))
     })
   
-  ## create a filtered dataset
+  ## create a filtered dataset ----
   
   data_selected <- reactive({
-    
-    
     
     data_selected <-
       data %>%
@@ -347,9 +345,10 @@ server <- function(input, output, session) {
     
   })
   
-  # create a table of filtered dataset
+  ## create a table of filtered data ----
   
   output$table01 <- renderReactable({
+    
     table_selected <-
       data_selected() %>%
       distinct(doi, .keep_all = T)
@@ -371,6 +370,18 @@ server <- function(input, output, session) {
     )
   })
   
+  ## download the filtered data ----
+  output$download_filtered <- downloadHandler(
+    
+    filename = "MH-shiny-datatable-filtered.csv",
+    
+    content = function(file) {
+      
+      s <- data_selected() %>% distinct(doi, .keep_all = T)
+      
+      write.csv(s[c(1:4, 6)], file)
+    }
+  )
   
   # graph-01
   
