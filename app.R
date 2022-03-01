@@ -114,30 +114,6 @@ ui <- fluidPage(
             multiple = TRUE
           ),
           
-          selectInput(
-            "target_category",
-            "Select by Target Category",
-            choices = levels(factor(data$target_cat)),
-            selected = NULL,
-            multiple = TRUE
-          ),
-          
-          selectInput(
-            "bio_target",
-            "Select by Biological Target Category",
-            choices = levels(factor(data$bio_target)),
-            selected = NULL,
-            multiple = TRUE
-          ),
-          
-          selectInput(
-            "bio_response",
-            "Select by Biological Response",
-            choices = levels(factor(data$bio_response)),
-            selected = NULL,
-            multiple = TRUE
-          ),
-          
           sliderInput(
             "int_depth",
             label = "Depth range",
@@ -161,10 +137,10 @@ ui <- fluidPage(
         fluidRow(
           column(3, htmlOutput("selection_1"), offset = 1),
           column(3, selectInput("var1", NULL , 
-                                choices = c("", names(data)),
+                                choices = c("", names(data)[c(3, 4, 10:12, 15:25)]),
                                 selected = "")),
           column(3, selectInput("var2", NULL , 
-                                choices = c("", names(data)),
+                                choices = c("", names(data)[c(3, 4, 10:12, 15:25)]),
                                 selected = ""))
         ),
         h2("List of scientific items"),
@@ -190,8 +166,7 @@ ui <- fluidPage(
           column(3, htmlOutput("selection_2"), offset = 1),
         ),
         hr(),
-        h2("Word Cloud "),
-        
+
         sidebarLayout(
           # Sidebar with a slider and selection inputs
           sidebarPanel(
@@ -203,13 +178,11 @@ ui <- fluidPage(
               selected = NULL,
               multiple = FALSE
             ),
-            actionButton("update", "Update"),
             hr(),
-            sliderInput(
-              "freq",
+            h4("Wordcloud"), 
+            numericInput(
+              "cloud_min_freq",
               "Minimum Frequency:",
-              min = 1,
-              max = 50,
               value = 5
             ),
             sliderInput(
@@ -219,12 +192,17 @@ ui <- fluidPage(
               max = 300,
               value = 300
             ),
+            hr(),
+            h4("Words frequency"),
+            numericInput("words_min_freq", 
+                         "Minimum frequency:",
+                         value = 1),   
             width = 3
           ),
           
           # Show Word Cloud
-          mainPanel(plotOutput("cloud"),
-                    plotOutput("frequencies"))
+          mainPanel(column(6, plotOutput("cloud")),
+                    column(6, plotOutput("frequencies")))
         )
       )
     ),
@@ -332,9 +310,8 @@ server <- function(input, output, session) {
                   ", ", input$site, 
                   ", ", input$site_type,
                   ", ", input$country,
-                  ", ", input$target_cat,
-                  ", ", input$bio_target,
-                  ", ", input$bio_response, 
+                  ", depth: ", min(input$int_depth), 
+                  "-", max(input$int_depth), " m",
                   "</b>"))
     })
   
@@ -349,13 +326,10 @@ server <- function(input, output, session) {
       filter(area %in% input$area |
                site %in% input$site |
                site_type %in% input$site_type |
-               country %in% input$country |
-               target_cat %in% input$target_cat |
-               bio_target %in% input$bio_target |
-               bio_response %in% input$bio_response)
+               country %in% input$country )
 
-    validate(need(nrow(data_selected)!=0, "There are no matches in the dataset.
-                  Try removing one or more filters."))
+    validate(need(nrow(data_selected)!=0, 
+    "There are no matches in the dataset. Try removing one or more filters."))
 
     data_selected
 
@@ -416,7 +390,6 @@ server <- function(input, output, session) {
     )
   })
   
-
   
   ## download the filtered data ----
   output$download_filtered <- downloadHandler(
@@ -519,7 +492,7 @@ server <- function(input, output, session) {
           wordcloud_rep(
             word,
             n,
-            min.freq = input$freq,
+            min.freq = input$cloud_min_freq,
             max.words = input$max,
             random.order = FALSE,
             colors = brewer.pal(8, "Dark2")
@@ -528,25 +501,27 @@ server <- function(input, output, session) {
     })
   
   
-  ## Number of Words occurrence ----
+  ## words frequency ----
   
-  output$frequencies <-
-    renderPlot({
-      tidy_words() %>%
-        filter(n > 50) %>%
+  output$frequencies <- renderPlot({
+      
+    tidy_words() %>%
+        filter(n > input$words_min_freq) %>%
         mutate(word = reorder(word, n)) %>%
         ggplot(aes(word, n, fill = n, label = n)) +
         geom_bar(stat = "identity") +
         geom_label(aes(fill = n), colour = "white", fontface = "bold") +
         scale_fill_gradientn(colours = brewer.pal(8, "Accent")) +
         coord_flip() +
-        labs(y = "N. of Occurrence",
-             x = "Keywords") +
+        labs(title = "Words Frequency",
+             x = "", y = "N. of Occurrence") +
         theme_bw() +
         theme(legend.position = "none")
     })
   
-  ## observeEvent - input$area
+  ## observeEvent ----
+  
+  ### input$area ----
   
   observeEvent(input$area, {
     
@@ -559,14 +534,15 @@ server <- function(input, output, session) {
       leafletProxy("map") %>%
         addCircleMarkers(
           data = data_selected(),
-          lng = ~ Longitude,
-          lat = ~ Latitude,
           stroke = T,
           color = "white",
           weight = 0.2,
           fillColor = ~ pal_area(colorData_area),
-          popup = ~htmlEscape(Longitude),
-          popupOptions = popupOptions(maxWidth = "100%", closeOnClick = TRUE),
+          popup = ~ paste0(
+            "<b>Country: </b>", country, "<br>",
+            "<b>Name: </b>", site, "<br>",
+            "<b>Range depth: </b>", min(avg_depth), "-", max(data$avg_depth), "<br>"), 
+          popupOptions = popupOptions(closeOnClick = TRUE),
           label = ~ as.character(site),
           labelOptions = labelOptions(
             style = list("font-weight" = "normal", padding = "3px 8px"),
@@ -577,28 +553,27 @@ server <- function(input, output, session) {
     }
   })
   
-  # observeEvent - input$site
+  ### input$site ----
   
   observeEvent(input$site, {
     if (input$site != "")
     {
-      # leafletProxy("map") %>% clearShapes()
-      
       colorData_site <- data[data$site %in% input$site, ]
       pal_site <- colorFactor("magma", levels = colorData_site)
       
       leafletProxy("map", session) %>%
         addCircleMarkers(
           data = data_selected(),
-          lng = ~ Longitude,
-          lat = ~ Latitude,
           stroke = T,
           color = "white",
           weight = 0.2,
           fillColor = ~ pal_site(colorData_site),
+          popup = ~ paste0(
+            "<b>Country: </b>", country, "<br>",
+            "<b>Name: </b>", site, "<br>",
+            "<b>Range depth: </b>", min(avg_depth), "-", max(avg_depth), "<br>"), 
+          popupOptions = popupOptions(closeOnClick = TRUE),
           label = ~ as.character(site),
-          popup = ~htmlEscape(c(area,site)),
-          popupOptions = popupOptions(maxWidth = "100%", closeOnClick = TRUE),
           labelOptions = labelOptions(
             style = list("font-weight" = "normal", padding = "3px 8px"),
             textsize = "11px",
@@ -608,7 +583,6 @@ server <- function(input, output, session) {
     }
   })
   
-  ## observeEvent ----
   
   ### input$site_type ----
   
@@ -622,14 +596,15 @@ server <- function(input, output, session) {
       leafletProxy("map") %>%
         addCircleMarkers(
           data = data_selected(),
-          lng = ~ Longitude,
-          lat = ~ Latitude,
           stroke = T,
           color = "white",
           weight = 0.2,
           fillColor = ~ pal_type(colorData_site_type),
-          popup = ~htmlEscape(Longitude),
-          popupOptions = popupOptions(maxWidth = "100%", closeOnClick = TRUE),
+          popup = ~ paste0(
+            "<b>Country: </b>", country, "<br>",
+            "<b>Name: </b>", site, "<br>",
+            "<b>Range depth: </b>", min(avg_depth), "-", max(data$avg_depth), "<br>"), 
+          popupOptions = popupOptions(closeOnClick = TRUE),
           label = ~ as.character(site),
           labelOptions = labelOptions(
             style = list("font-weight" = "normal", padding = "3px 8px"),
@@ -652,14 +627,15 @@ server <- function(input, output, session) {
       leafletProxy("map") %>%
         addCircleMarkers(
           data = data_selected(),
-          lng = ~ Longitude,
-          lat = ~ Latitude,
           stroke = T,
           color = "white",
           weight = 0.2,
           fillColor = ~ pal_type(colorData_country),
-          popup = ~htmlEscape(country),
-          popupOptions = popupOptions(maxWidth = "100%", closeOnClick = TRUE),
+          popup = ~ paste0(
+            "<b>Country: </b>", country, "<br>",
+            "<b>Name: </b>", site, "<br>",
+            "<b>Range depth: </b>", min(avg_depth), "-", max(data$avg_depth), "<br>"), 
+          popupOptions = popupOptions(closeOnClick = TRUE),
           label = ~ as.character(site),
           labelOptions = labelOptions(
             style = list("font-weight" = "normal", padding = "3px 8px"),
@@ -678,20 +654,11 @@ server <- function(input, output, session) {
     updateSelectInput(session, "site_type", selected = "")
     updateSelectInput(session, "area", selected = "")
     updateSelectInput(session, "country", selected = "")
-    updateSelectInput(session, "target_cat", selected = "")
-    updateSelectInput(session, "bio_target", selected = "")
-    updateSelectInput(session, "bio_response", selected = "")
-    
+
     leafletProxy("map") %>% clearMarkers()
     
   })
   
-  ### input$update ----
-  
-  observeEvent(input$update, {
-    updateSelectInput(session, "selection", selected = "")
-    
-  })
   
 }
 
