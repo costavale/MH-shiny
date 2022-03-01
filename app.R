@@ -21,20 +21,20 @@ library(wordcloud)
 # database-systematic map
 data <- read.csv("data/database_selected.csv")
 
-# national MPA
-MPA_med_national <-
-  st_read("data/MPAnational_5m.gpkg", quiet = T) %>%
-  st_transform('+proj=longlat +datum=WGS84')
-
-# Nature 2000 site
-MPA_med_NATURA2000 <-
-  st_read("data/Nature2000_5m.gpkg", quiet = T) %>%
-  st_transform('+proj=longlat +datum=WGS84')
-
-# Proposed Natura 2000 site
-MPA_med_pNATURA2000 <-
-  st_read("data/PropNature2000_5m.gpkg", quiet = T) %>%
-  st_transform('+proj=longlat +datum=WGS84')
+# # national MPA
+# MPA_med_national <-
+#   st_read("data/MPAnational_5m.gpkg", quiet = T) %>%
+#   st_transform('+proj=longlat +datum=WGS84')
+# 
+# # Nature 2000 site
+# MPA_med_NATURA2000 <-
+#   st_read("data/Nature2000_5m.gpkg", quiet = T) %>%
+#   st_transform('+proj=longlat +datum=WGS84')
+# 
+# # Proposed Natura 2000 site
+# MPA_med_pNATURA2000 <-
+#   st_read("data/PropNature2000_5m.gpkg", quiet = T) %>%
+#   st_transform('+proj=longlat +datum=WGS84')
 
 
 # shiny-ui ----------------------------------------------------------------
@@ -52,7 +52,9 @@ ui <- fluidPage(
                class = "outer",
                
                hr(),
-               includeMarkdown("inst/Rmarkdown/home-MH.Rmd")               
+               includeMarkdown("inst/Rmarkdown/home-MH.Rmd"),
+               hr(),
+               helpText("Info from http://www.marinehazard.cnr.it.")
 
              )),
     
@@ -158,15 +160,20 @@ ui <- fluidPage(
         hr(),
         fluidRow(
           column(3, htmlOutput("selection_1"), offset = 1),
+          column(3, selectInput("var1", NULL , 
+                                choices = c("", names(data)),
+                                selected = "")),
+          column(3, selectInput("var2", NULL , 
+                                choices = c("", names(data)),
+                                selected = ""))
         ),
-        hr(),
         h2("List of scientific items"),
         
         fluidRow(
           column(9, reactableOutput("table01"),
                  downloadButton("download_filtered")),
-          column(3, plotOutput("target_cat", height = "40vh"),
-                      plotOutput("bio_target", height = "40vh"))
+          column(3, plotOutput("graph_01", height = "40vh"),
+                      plotOutput("graph_02", height = "40vh"))
         )
         
       )
@@ -238,24 +245,24 @@ ui <- fluidPage(
 
 server <- function(input, output, session) {
   
-  ## create the text for map labels ----
-    mylabels_MPA <- paste(
-    "<b>", "National Marine Protected Area", "</b>", "<br/>",
-    "<b>", "Country: ", "</b>", MPA_med_national$ISO3,"<br/>",
-    "<b>", "Name: ", "</b>", MPA_med_national$NAME, "<br/>") %>%
-    lapply(htmltools::HTML)
-
-  mylabels_Nat2000 <- paste(
-    "<b>", "Nature2000 area", "</b>", "<br/>",
-    "<b>", "Country: ", "</b>", MPA_med_NATURA2000$ISO3,"<br/>",
-    "<b>", "Name: ", "</b>", MPA_med_NATURA2000$NAME, "<br/>") %>%
-    lapply(htmltools::HTML)
-
-  mylabels_pNat2000 <- paste(
-    "<b>", "Proposed Nature2000 area", "</b>", "<br/>",
-    "<b>", "Country: ", "</b>", MPA_med_pNATURA2000$ISO3,"<br/>",
-    "<b>", "Name: ", "</b>", MPA_med_pNATURA2000$NAME, "<br/>") %>%
-    lapply(htmltools::HTML)
+  # ## create the text for map labels ----
+  #   mylabels_MPA <- paste(
+  #   "<b>", "National Marine Protected Area", "</b>", "<br/>",
+  #   "<b>", "Country: ", "</b>", MPA_med_national$ISO3,"<br/>",
+  #   "<b>", "Name: ", "</b>", MPA_med_national$NAME, "<br/>") %>%
+  #   lapply(htmltools::HTML)
+  # 
+  # mylabels_Nat2000 <- paste(
+  #   "<b>", "Nature2000 area", "</b>", "<br/>",
+  #   "<b>", "Country: ", "</b>", MPA_med_NATURA2000$ISO3,"<br/>",
+  #   "<b>", "Name: ", "</b>", MPA_med_NATURA2000$NAME, "<br/>") %>%
+  #   lapply(htmltools::HTML)
+  # 
+  # mylabels_pNat2000 <- paste(
+  #   "<b>", "Proposed Nature2000 area", "</b>", "<br/>",
+  #   "<b>", "Country: ", "</b>", MPA_med_pNATURA2000$ISO3,"<br/>",
+  #   "<b>", "Name: ", "</b>", MPA_med_pNATURA2000$NAME, "<br/>") %>%
+  #   lapply(htmltools::HTML)
 
   
   ## create the base-map ----
@@ -266,42 +273,42 @@ server <- function(input, output, session) {
         setView(15, 37, zoom = 4.5) %>%
         addMeasure(position = "bottomleft") %>%
         
-        ### add MPA polygons ----
-        addPolygons(data = MPA_med_national,
-                  color = "green",
-                  stroke = T,
-                  weight = 1,
-                  label = mylabels_MPA,
-                  labelOptions = labelOptions(
-                    style = list("font-weight" = "normal", padding = "3px 8px"),
-                    textsize = "11px",
-                    direction = "auto"),
-                  group = "MPA (green)") %>%
-      
-        ### add Nature2000 polygons ----
-      addPolygons(data = MPA_med_NATURA2000,
-                  color = "orange",
-                  stroke = T,
-                  weight = 1,
-                  label = mylabels_Nat2000,
-                  labelOptions = labelOptions(
-                    style = list("font-weight" = "normal", 
-                                 padding = "3px 8px"),
-                    textsize = "11px",
-                    direction = "auto"),
-                  group = "Nature 2000 (orange)") %>%
-      
-        ### add ProposedNature2000 polygons ----
-      addPolygons(data = MPA_med_pNATURA2000,
-                  color = "grey",
-                  stroke = T,
-                  weight = 1,
-                  label = mylabels_pNat2000,
-                  labelOptions = labelOptions(
-                    style = list("font-weight" = "normal", padding = "3px 8px"),
-                    textsize = "11px",
-                    direction = "auto"),
-                  group = "Proposed Nature 2000 (grey)") %>%
+      #   ### add MPA polygons ----
+      #   addPolygons(data = MPA_med_national,
+      #             color = "green",
+      #             stroke = T,
+      #             weight = 1,
+      #             label = mylabels_MPA,
+      #             labelOptions = labelOptions(
+      #               style = list("font-weight" = "normal", padding = "3px 8px"),
+      #               textsize = "11px",
+      #               direction = "auto"),
+      #             group = "MPA (green)") %>%
+      # 
+      #   ### add Nature2000 polygons ----
+      # addPolygons(data = MPA_med_NATURA2000,
+      #             color = "orange",
+      #             stroke = T,
+      #             weight = 1,
+      #             label = mylabels_Nat2000,
+      #             labelOptions = labelOptions(
+      #               style = list("font-weight" = "normal", 
+      #                            padding = "3px 8px"),
+      #               textsize = "11px",
+      #               direction = "auto"),
+      #             group = "Nature 2000 (orange)") %>%
+      # 
+      #   ### add ProposedNature2000 polygons ----
+      # addPolygons(data = MPA_med_pNATURA2000,
+      #             color = "grey",
+      #             stroke = T,
+      #             weight = 1,
+      #             label = mylabels_pNat2000,
+      #             labelOptions = labelOptions(
+      #               style = list("font-weight" = "normal", padding = "3px 8px"),
+      #               textsize = "11px",
+      #               direction = "auto"),
+      #             group = "Proposed Nature 2000 (grey)") %>%
       
         ### add Layers control ----
       addLayersControl(
@@ -323,27 +330,64 @@ server <- function(input, output, session) {
       HTML(paste0("Selection: ", "<b>", 
                   input$area, 
                   ", ", input$site, 
-                  ", ", input$site_type,  
+                  ", ", input$site_type,
+                  ", ", input$country,
+                  ", ", input$target_cat,
+                  ", ", input$bio_target,
+                  ", ", input$bio_response, 
                   "</b>"))
     })
   
-  ## create a selected dataset ----
   
+  ## create a selected dataset ----
+
   data_selected <- reactive({
-    
-    data_selected <-
+
+  data_selected <-
+
       data %>%
-      filter(site %in% input$site |
-               area %in% input$area |
+      filter(area %in% input$area |
+               site %in% input$site |
                site_type %in% input$site_type |
                country %in% input$country |
                target_cat %in% input$target_cat |
                bio_target %in% input$bio_target |
                bio_response %in% input$bio_response)
-    
+
+    validate(need(nrow(data_selected)!=0, "There are no matches in the dataset.
+                  Try removing one or more filters."))
+
     data_selected
-    
+
   })
+  
+  
+  # ## create a selected dataset ----
+  # 
+  # data_selected <- reactive({
+  #   
+  #   req(input$area)
+  #   req(input$site)
+  #   
+  #   data_selected <-
+  #     data %>% 
+  #     filter(
+  #       if (input$area != "") {
+  #         area %in% input$area
+  #       } else { }) %>%
+  #     filter(
+  #       if (input$site != "") {
+  #         site %in% input$site
+  #       } else { })
+  #   
+  #   validate(need(nrow(data_selected)!=0, "There are no matches in the dataset.
+  #                 Try removing one or more filters."))
+  #   
+  #   data_selected
+  #   
+  # })
+  
+  
   
   ## create a table of filtered data ----
   
@@ -372,6 +416,8 @@ server <- function(input, output, session) {
     )
   })
   
+
+  
   ## download the filtered data ----
   output$download_filtered <- downloadHandler(
     
@@ -379,28 +425,28 @@ server <- function(input, output, session) {
     
     content = function(file) {
       
-      s <- data_selected() %>% distinct(doi, .keep_all = T)
+      s <- data_selected() %>% 
+        distinct(doi, .keep_all = T)
       
       write.csv(s[c(1:4, 6)], file)
     }
   )
   
   ## graph-01 ----
-  
-  output$target_cat <- renderPlot({
+
+  output$graph_01 <- renderPlot({
+
+    req(input$var1)
     
     data_selected() %>%
-      ggplot() +
-      geom_histogram(aes(x = avg_depth, fill = target_cat),
+      ggplot(aes_string(x = input$var1)) +
+      geom_bar(aes_string(x = input$var1, fill = input$var1),
                      color = "black") +
-      scale_fill_brewer(palette = "Dark2") +
       labs(x = NULL,
-           y = "# of observations",
-           title = "Observations per depth") +
+           y = "# of observations") +
       guides(
         fill = guide_legend(
-          title = "Target category",
-          ncol = 2,
+          ncol = 3,
           title.position = "top",
           title.theme = element_text(face = "bold",
                                      size = 11)
@@ -409,27 +455,24 @@ server <- function(input, output, session) {
       theme_bw() +
       theme(legend.position = "bottom",
             text = element_text(size = 11))
-    
+
   })
   
   ## graph-02 ----
-  
-  output$bio_target <- renderPlot({
+
+  output$graph_02 <- renderPlot({
+
+    req(input$var2)
     
     data_selected() %>%
-      filter(target_cat == "biological") %>%
-      ggplot() +
-      geom_histogram(aes(x = avg_depth,
-                         fill = bio_target),
-                     color = "black") +
-      scale_fill_brewer(palette = "PiYG") +
+      ggplot(aes_string(x = input$var2)) +
+      geom_bar(aes_string(x = input$var2, fill = input$var2),
+               color = "black") +
       labs(x = NULL,
-           y = "# of observations",
-           title = "Observations per biological target") +
+           y = "# of observations") +
       guides(
         fill = guide_legend(
-          title = "Biological target",
-          ncol = 4,
+          ncol = 3,
           title.position = "top",
           title.theme = element_text(face = "bold",
                                      size = 11)
@@ -438,8 +481,8 @@ server <- function(input, output, session) {
       theme_bw() +
       theme(legend.position = "bottom",
             text = element_text(size = 11))
-    
-    
+
+
   })
   
   ## create the tidy_words dataset ----
