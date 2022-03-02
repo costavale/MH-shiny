@@ -403,8 +403,7 @@ server <- function(input, output, session) {
       ggplot(aes_string(x = input$var1)) +
       geom_bar(aes_string(x = input$var1, fill = input$var1),
                      color = "black") +
-      labs(x = NULL,
-           y = "# of observations") +
+      labs(y = "# of observations") +
       guides(
         fill = guide_legend(
           ncol = 3,
@@ -429,8 +428,7 @@ server <- function(input, output, session) {
       ggplot(aes_string(x = input$var2)) +
       geom_bar(aes_string(x = input$var2, fill = input$var2),
                color = "black") +
-      labs(x = NULL,
-           y = "# of observations") +
+      labs(y = "# of observations") +
       guides(
         fill = guide_legend(
           ncol = 3,
