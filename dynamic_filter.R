@@ -1,14 +1,5 @@
 ##### begin dynamic filter #####
 
-fields <- reactive({
-  c(colnames(data_internal$raw))
-})
-
-# filter_by <- function (df, ...) {
-#   filter_conditions <- quos(...)
-#   df %>% dplyr::filter(!!!filter_conditions)
-# }
-
 # filter on 1 column
 filter1_by <- function(df, fcol1, fv1) {
   
@@ -179,3 +170,29 @@ output$filter3choice <- renderUI(
 )
 
 ##### end dynamic filter ####
+
+
+#   ## filter_var function
+#   
+#   filter_var <- function(x, val) {
+#   if (is.numeric(x)) {
+#     !is.na(x) & x >= val[1] & x <= val[2]
+#   } else if (is.factor(x)) {
+#     x %in% val
+#   } else if (is.character(x)) {
+#     x %in% val
+#   } else {
+#     # No control, so don't filter
+#     TRUE
+#   }
+# }
+
+# ## create a selected filter ----
+# 
+# selected <- reactive({
+#   
+#   filter_var(data$area, input$area) &
+#     filter_var(data$site, input$site) &
+#     filter_var(data$site_type, input$site_type) 
+#   
+#   })

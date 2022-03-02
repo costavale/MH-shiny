@@ -56,10 +56,10 @@ ui <- fluidPage(
                  column(5, includeMarkdown("inst/Rmarkdown/home-MH.Rmd"), 
                         img(src = "SZN.png",
                             height = "100px",
-                            width = "280px"), offset = 1),
+                            width = "250px"), offset = 1),
                  column(6, img(src = "vulcano.png",
-                               height = "450px",
-                               width = "450px"))),
+                               height = "480px",
+                               width = "640px"))),
                hr(),
                helpText("Info from http://www.marinehazard.cnr.it.", align = "center")
 
@@ -90,30 +90,6 @@ ui <- fluidPage(
           height = "auto",
           
           selectInput(
-            "area",
-            "Select by Area",
-            choices = levels(factor(data$area)),
-            selected = NULL,
-            multiple = TRUE
-          ),
-          
-          selectInput(
-            "site",
-            "Select by Site Name",
-            choices = levels(factor(data$site)),
-            selected = NULL,
-            multiple = TRUE
-          ),
-          
-          selectInput(
-            "site_type",
-            "Select by Site Type",
-            choices = levels(factor(data$site_type)),
-            selected = NULL,
-            multiple = TRUE
-          ),
-          
-          selectInput(
             "country",
             "Select by Country",
             choices = levels(factor(data$country)),
@@ -121,13 +97,43 @@ ui <- fluidPage(
             multiple = TRUE
           ),
           
-          sliderInput(
-            "int_depth",
-            label = "Depth range",
-            min = min(data$avg_depth),
-            max = max(data$avg_depth),
-            value = c(min(data$avg_depth), max(data$avg_depth))
+          conditionalPanel(
+            condition = "input.country != ''", 
+            selectInput(
+            "area",
+            "Select by Area",
+            choices = levels(factor(data$area)),
+            selected = NULL,
+            multiple = TRUE)
           ),
+          
+          conditionalPanel(
+            condition = "input.area != ''",
+            selectInput("site",
+            "Select by Site Name",
+            choices = levels(factor(data$site)),
+            selected = NULL,
+            multiple = TRUE)
+          ),
+          
+          conditionalPanel(
+            condition = "input.site != ''",
+            selectInput(
+            "site_type",
+            "Select by Site Type",
+            choices = levels(factor(data$site_type)),
+            selected = NULL,
+            multiple = TRUE)
+          ),
+          
+
+          # sliderInput(
+          #   "int_depth",
+          #   label = "Depth range",
+          #   min = min(data$avg_depth),
+          #   max = max(data$avg_depth),
+          #   value = c(min(data$avg_depth), max(data$avg_depth))
+          # ),
           
           actionButton("int_clear", "Clear selection")
         )
@@ -220,7 +226,7 @@ ui <- fluidPage(
                class = "outer",
                
                hr(),
-               includeMarkdown("inst/Rmarkdown/about-MH.Rmd")               
+               column(10, includeMarkdown("inst/Rmarkdown/about-MH.Rmd"), offset = 1)               
              ))
     
   )
@@ -251,12 +257,15 @@ server <- function(input, output, session) {
 
   
   ## create the base-map ----
+  
   output$map <-
     renderLeaflet({
       leaflet() %>%
         addProviderTiles(providers$CartoDB.Positron) %>%
         setView(15, 37, zoom = 4.5) %>%
-        addMeasure(position = "bottomleft") %>%
+        addMeasure(position = "bottomleft") 
+      
+      # %>%
         
       #   ### add MPA polygons ----
       #   addPolygons(data = MPA_med_national,
@@ -295,16 +304,17 @@ server <- function(input, output, session) {
       #               direction = "auto"),
       #             group = "Proposed Nature 2000 (grey)") %>%
       
-        ### add Layers control ----
-      addLayersControl(
-        overlayGroups = c(
-          "MPA (green)",
-          "Nature 2000 (orange)",
-          "Proposed Nature 2000 (grey)"
-        ),
-        position = "bottomright",
-        options = layersControlOptions(collapsed = FALSE)
-      )
+      #   ### add Layers control ----
+      # addLayersControl(
+      #   overlayGroups = c(
+      #     "MPA (green)",
+      #     "Nature 2000 (orange)",
+      #     "Proposed Nature 2000 (grey)"
+      #   ),
+      #   position = "bottomright",
+      #   options = layersControlOptions(collapsed = FALSE)
+      # )
+      
     })
   
   ## Selection ----
@@ -317,8 +327,6 @@ server <- function(input, output, session) {
                   ", ", input$site, 
                   ", ", input$site_type,
                   ", ", input$country,
-                  ", depth: ", min(input$int_depth), 
-                  "-", max(input$int_depth), " m",
                   "</b>"))
     })
   
@@ -335,39 +343,12 @@ server <- function(input, output, session) {
                site_type %in% input$site_type |
                country %in% input$country )
 
-    validate(need(nrow(data_selected)!=0, 
+    validate(need(nrow(data_selected)!=0,
     "There are no matches in the dataset. Try removing one or more filters."))
 
     data_selected
 
   })
-  
-  
-  # ## create a selected dataset ----
-  # 
-  # data_selected <- reactive({
-  #   
-  #   req(input$area)
-  #   req(input$site)
-  #   
-  #   data_selected <-
-  #     data %>% 
-  #     filter(
-  #       if (input$area != "") {
-  #         area %in% input$area
-  #       } else { }) %>%
-  #     filter(
-  #       if (input$site != "") {
-  #         site %in% input$site
-  #       } else { })
-  #   
-  #   validate(need(nrow(data_selected)!=0, "There are no matches in the dataset.
-  #                 Try removing one or more filters."))
-  #   
-  #   data_selected
-  #   
-  # })
-  
   
   
   ## create a table of filtered data ----
@@ -548,7 +529,8 @@ server <- function(input, output, session) {
           popup = ~ paste0(
             "<b>Country: </b>", country, "<br>",
             "<b>Name: </b>", site, "<br>",
-            "<b>Range depth: </b>", min(avg_depth), "-", max(data$avg_depth), "<br>"), 
+            "<b>Range depth: </b>", min(avg_depth), "-", max(data$avg_depth), 
+            " m", "<br>"), 
           popupOptions = popupOptions(closeOnClick = TRUE),
           label = ~ as.character(site),
           labelOptions = labelOptions(
@@ -578,7 +560,8 @@ server <- function(input, output, session) {
           popup = ~ paste0(
             "<b>Country: </b>", country, "<br>",
             "<b>Name: </b>", site, "<br>",
-            "<b>Range depth: </b>", min(avg_depth), "-", max(avg_depth), "<br>"), 
+            "<b>Range depth: </b>", min(avg_depth), "-", max(avg_depth), 
+            " m", "<br>"), 
           popupOptions = popupOptions(closeOnClick = TRUE),
           label = ~ as.character(site),
           labelOptions = labelOptions(
@@ -610,7 +593,8 @@ server <- function(input, output, session) {
           popup = ~ paste0(
             "<b>Country: </b>", country, "<br>",
             "<b>Name: </b>", site, "<br>",
-            "<b>Range depth: </b>", min(avg_depth), "-", max(data$avg_depth), "<br>"), 
+            "<b>Range depth: </b>", min(avg_depth), "-", max(data$avg_depth), 
+            " m", "<br>"), 
           popupOptions = popupOptions(closeOnClick = TRUE),
           label = ~ as.character(site),
           labelOptions = labelOptions(
@@ -641,7 +625,8 @@ server <- function(input, output, session) {
           popup = ~ paste0(
             "<b>Country: </b>", country, "<br>",
             "<b>Name: </b>", site, "<br>",
-            "<b>Range depth: </b>", min(avg_depth), "-", max(data$avg_depth), "<br>"), 
+            "<b>Range depth: </b>", min(avg_depth), "-", max(data$avg_depth), 
+            " m", "<br>"), 
           popupOptions = popupOptions(closeOnClick = TRUE),
           label = ~ as.character(site),
           labelOptions = labelOptions(
