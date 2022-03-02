@@ -52,9 +52,16 @@ ui <- fluidPage(
                class = "outer",
                
                hr(),
-               includeMarkdown("inst/Rmarkdown/home-MH.Rmd"),
+               fluidRow(
+                 column(5, includeMarkdown("inst/Rmarkdown/home-MH.Rmd"), 
+                        img(src = "SZN.png",
+                            height = "100px",
+                            width = "280px"), offset = 1),
+                 column(6, img(src = "vulcano.png",
+                               height = "450px",
+                               width = "450px"))),
                hr(),
-               helpText("Info from http://www.marinehazard.cnr.it.")
+               helpText("Info from http://www.marinehazard.cnr.it.", align = "center")
 
              )),
     
