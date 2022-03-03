@@ -89,41 +89,41 @@ ui <- fluidPage(
           width = 280,
           height = "auto",
           
+          h4(HTML("<b> Select one variable at time </b>")),
+          hr(),
+        
           selectInput(
             "country",
-            "Select by Country",
+            "Select a Country",
             choices = levels(factor(data$country)),
             selected = NULL,
             multiple = TRUE
           ),
           
-          conditionalPanel(
-            condition = "input.country != ''", 
+         
             selectInput(
             "area",
-            "Select by Area",
+            "Select an Area",
             choices = levels(factor(data$area)),
             selected = NULL,
-            multiple = TRUE)
+            multiple = TRUE
           ),
           
-          conditionalPanel(
-            condition = "input.area != ''",
+         
             selectInput("site",
-            "Select by Site Name",
+            "Select a Site Name",
             choices = levels(factor(data$site)),
             selected = NULL,
-            multiple = TRUE)
+            multiple = TRUE
           ),
           
-          conditionalPanel(
-            condition = "input.site != ''",
+         
             selectInput(
             "site_type",
-            "Select by Site Type",
+            "Select the Site Type",
             choices = levels(factor(data$site_type)),
             selected = NULL,
-            multiple = TRUE)
+            multiple = TRUE
           ),
           
 
@@ -369,7 +369,10 @@ server <- function(input, output, session) {
         title = colDef(name = "Title"),
         year = colDef(name = "Year", minWidth = 40) ,
         source_title = colDef(name = "Source Title"),
-        link = colDef(name = "Link")
+        link = colDef(name = "Link", html = TRUE,
+                      cell = function(value, index) {
+                        sprintf('<a href="%s" target="_blank">%s</a>', table_selected$link[index], value)
+                      })
       ),
       height = 700,
       outlined = TRUE,
