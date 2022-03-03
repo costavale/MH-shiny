@@ -371,7 +371,8 @@ server <- function(input, output, session) {
         source_title = colDef(name = "Source Title"),
         link = colDef(name = "Link", html = TRUE,
                       cell = function(value, index) {
-                        sprintf('<a href="%s" target="_blank">%s</a>', table_selected$link[index], value)
+                        sprintf('<a href="%s" target="_blank">%s</a>', 
+                                table_selected$link[index], value)
                       })
       ),
       height = 700,
