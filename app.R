@@ -144,23 +144,24 @@ ui <- fluidPage(
     tabPanel(
       "Data Explorer",
       div(
-        class = "outer",
+        class = "",
         
         hr(),
         fluidRow(
           column(3, htmlOutput("selection_1"), offset = 1),
-          column(3, selectInput("var1", NULL , 
+          column(3, selectInput("var1", "Choose a variable to visualize:", 
                                 choices = c("", names(data)[c(3, 4, 10:12, 15:25)]),
                                 selected = "")),
-          column(3, selectInput("var2", NULL , 
+          column(3, selectInput("var2", "Choose a variable to visualize:", 
                                 choices = c("", names(data)[c(3, 4, 10:12, 15:25)]),
                                 selected = ""))
         ),
-        h2("List of scientific items"),
-        
+        hr(),
+        h3("List of scientific items"),
         fluidRow(
-          column(9, reactableOutput("table01"),
-                 downloadButton("download_filtered")),
+          column(9, reactableOutput("table01", height = "auto"),
+                 downloadButton("download_filtered", 
+                                label = "Download the selected data")),
           column(3, plotOutput("graph_01", height = "40vh"),
                       plotOutput("graph_02", height = "40vh"))
         )
@@ -172,7 +173,7 @@ ui <- fluidPage(
     tabPanel(
       "Keywords analysis",
       div(
-        class = "outer",
+        class = "",
         
         hr(),
         fluidRow(
@@ -186,9 +187,9 @@ ui <- fluidPage(
             selectInput(
               "selection",
               "Select:",
-              choices = c("", "abstract", "title",
+              choices = c("abstract", "title",
                           "author_keywords", "index_keywords"),
-              selected = NULL,
+              selected = "author_keywords",
               multiple = FALSE
             ),
             hr(),
@@ -196,20 +197,22 @@ ui <- fluidPage(
             numericInput(
               "cloud_min_freq",
               "Minimum Frequency:",
-              value = 5
+              value = 1
             ),
             sliderInput(
               "max",
               "Maximum Number of Words:",
               min = 1,
-              max = 300,
-              value = 300
+              max = 200,
+              value = 100
             ),
             hr(),
             h4("Words frequency"),
             numericInput("words_min_freq", 
                          "Minimum frequency:",
-                         value = 1),   
+                         value = 1),
+            hr(),
+            actionButton("int_clear_2", "Clear selection"),
             width = 3
           ),
           
@@ -448,14 +451,49 @@ server <- function(input, output, session) {
   
   tidy_words <- reactive({
     
-    req(input$selection)
+    if (input$selection == "abstract") {
+      
+      tidy_words <-
+        data_selected() %>%
+        distinct(doi, .keep_all = T) %>%
+        tidytext::unnest_tokens(
+          output = word,
+          input = abstract,
+          token = "regex",
+          pattern = ";"
+        ) %>%
+        filter(!is.na(word)) %>%
+        mutate(word = str_squish(word)) %>%
+        count(word, sort = T)
+      
+    }
+    
+    if (input$selection == "title") {
+      
+      tidy_words <-
+        data_selected() %>%
+        distinct(doi, .keep_all = T) %>%
+        tidytext::unnest_tokens(
+          output = word,
+          input = title,
+          token = "words"
+        ) %>%
+        filter(!is.na(word)) %>%
+        anti_join(get_stopwords()) %>%
+        anti_join(removing_word) %>% 
+        mutate(word = str_squish(word)) %>%
+        count(word, sort = T)
+      
+    }
+    
+    if (input$selection == "author_keywords") {
     
     tidy_words <-
       data_selected() %>%
       distinct(doi, .keep_all = T) %>%
       tidytext::unnest_tokens(
         output = word,
-        input = input$selection,
+        input = author_keywords,
         token = "regex",
         pattern = ";"
       ) %>%
@@ -463,10 +501,30 @@ server <- function(input, output, session) {
       mutate(word = str_squish(word)) %>%
       count(word, sort = T)
     
+    }
+    
+    if (input$selection == "index_keywords") {
+      
+      tidy_words <-
+        data_selected() %>%
+        distinct(doi, .keep_all = T) %>%
+        tidytext::unnest_tokens(
+          output = word,
+          input = index_keywords,
+          token = "regex",
+          pattern = ";"
+        ) %>%
+        filter(!is.na(word)) %>%
+        mutate(word = str_squish(word)) %>%
+        count(word, sort = T)
+      
+    }
+    
     tidy_words
     
   })
   
+
   ## wordcloud ----
   
   wordcloud_rep <- repeatable(wordcloud)
@@ -638,7 +696,8 @@ server <- function(input, output, session) {
   
   ### input$int_clear ----
   
-  observeEvent(input$int_clear, {
+  observeEvent(
+    input$int_clear & input$int_clear_2, {
     
     updateSelectInput(session, "site", selected = "")
     updateSelectInput(session, "site_type", selected = "")
