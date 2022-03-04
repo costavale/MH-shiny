@@ -212,9 +212,9 @@ ui <- fluidPage(
                          value = 1),
             hr(),
             h4("Network analysis"),
-            numericInput("cooccur_min", 
+            numericInput("net_min", 
                          "Minimum frequency:",
-                         value = 1),
+                         value = 5),
             hr(),
             actionButton("int_clear_2", "Clear selection"),
             width = 3
@@ -545,8 +545,7 @@ server <- function(input, output, session) {
   
   wordcloud_rep <- repeatable(wordcloud)
   
-  output$cloud <-
-    renderPlot({
+  output$cloud <- renderPlot({
       tidy_words() %>%
         with(
           wordcloud_rep(
@@ -584,7 +583,7 @@ server <- function(input, output, session) {
   
   keywords_cooccurences <-  reactive({
     
-    req(tidy_words)
+    req(data_selected)
     
     keywords_cooccurences <- 
       data_selected() %>%
@@ -610,7 +609,7 @@ server <- function(input, output, session) {
   output$network <- renderPlot({
     
     keywords_cooccurences() %>% 
-      # filter(n > 1) %>%
+      # filter(n > input$net_min) %>%
       igraph::graph_from_data_frame() %>%
       ggraph(layout = 'fr') +
       geom_edge_link(aes(edge_alpha = n, edge_color = n, edge_width = n)) +
