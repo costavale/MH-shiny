@@ -86,10 +86,10 @@ ui <- fluidPage(
           left = "auto",
           right = 20,
           bottom = "auto",
-          width = 280,
+          width = 290,
           height = "auto",
           
-          h4(HTML("<b> Select one variable at time </b>")),
+          h4(HTML("<b> Select one variable at a time </b>")),
           hr(),
         
           selectInput(
@@ -323,12 +323,14 @@ server <- function(input, output, session) {
   output$selection_1 <- output$selection_2 <-
     
     renderPrint({
+      
       HTML(paste0("Selection: ", "<b>", 
                   input$area, 
                   ", ", input$site, 
                   ", ", input$site_type,
                   ", ", input$country,
                   "</b>"))
+      
     })
   
   
@@ -398,16 +400,15 @@ server <- function(input, output, session) {
     }
   )
   
-  ## graph-01 ----
-
-  output$graph_01 <- renderPlot({
-
-    req(input$var1)
+  ## render graphs ----
+  
+  graphs <- reactive({
     
-    data_selected() %>%
-      ggplot(aes_string(x = input$var1)) +
-      geom_bar(aes_string(x = input$var1, fill = input$var1),
-                     color = "black") +
+    req(data_selected)
+    
+    graphs <- 
+      data_selected() %>%
+      ggplot() +
       labs(y = "# of observations") +
       guides(
         fill = guide_legend(
@@ -419,7 +420,25 @@ server <- function(input, output, session) {
       ) +
       theme_bw() +
       theme(legend.position = "bottom",
-            text = element_text(size = 11))
+            text = element_text(size = 11),
+            axis.text.x = element_text(angle = 30, 
+                                       vjust = 1,
+                                       hjust = 1))
+    
+  })
+  
+  
+  
+  ## graph-01 ----
+
+  output$graph_01 <- renderPlot({
+
+    req(input$var1)
+    
+    graphs() +
+      geom_bar(aes_string(x = input$var1, fill = input$var1),
+                     color = "black")
+      
 
   })
   
@@ -429,23 +448,10 @@ server <- function(input, output, session) {
 
     req(input$var2)
     
-    data_selected() %>%
-      ggplot(aes_string(x = input$var2)) +
-      geom_bar(aes_string(x = input$var2, fill = input$var2),
-               color = "black") +
-      labs(y = "# of observations") +
-      guides(
-        fill = guide_legend(
-          ncol = 3,
-          title.position = "top",
-          title.theme = element_text(face = "bold",
-                                     size = 11)
-        )
-      ) +
-      theme_bw() +
-      theme(legend.position = "bottom",
-            text = element_text(size = 11))
-
+    graphs() +
+      geom_bar(aes_string(x = input$var2, 
+                          fill = input$var2),
+               color = "black") 
 
   })
   
