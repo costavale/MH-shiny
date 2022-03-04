@@ -15,6 +15,7 @@ library(DT)
 library(RColorBrewer)
 library(reactable)
 library(wordcloud)
+library(ggraph)
 
 # dataset -----------------------------------------------------------------
 
@@ -210,13 +211,20 @@ ui <- fluidPage(
                          "Minimum frequency:",
                          value = 1),
             hr(),
+            h4("Network analysis"),
+            numericInput("cooccur_min", 
+                         "Minimum frequency:",
+                         value = 1),
+            hr(),
             actionButton("int_clear_2", "Clear selection"),
             width = 3
           ),
           
           # Show Word Cloud
-          mainPanel(column(6, plotOutput("cloud")),
-                    column(6, plotOutput("frequencies")))
+          mainPanel(
+            fluidRow(column(6, plotOutput("cloud")),
+                    column(6, plotOutput("frequencies"))),
+            fluidRow(column(12, plotOutput("network"))))
         )
       )
     ),
@@ -570,6 +578,53 @@ server <- function(input, output, session) {
         theme_bw() +
         theme(legend.position = "none")
     })
+  
+  
+  ## keywords co-occurrence ----
+  
+  keywords_cooccurences <-  reactive({
+    
+    req(tidy_words)
+    
+    keywords_cooccurences <- 
+      data_selected() %>%
+      distinct(doi, .keep_all = T) %>%
+      tidytext::unnest_tokens(
+        output = word,
+        input = input$selection,
+        token = "regex",
+        pattern = ";"
+      ) %>%
+      filter(!is.na(word)) %>%
+      mutate(word = str_squish(word)) %>%
+      widyr::pairwise_count(item = word, 
+                            feature = doi, 
+                            sort = TRUE)
+    
+    })
+    
+    
+  
+  ## graph of network co-occurrence
+  
+  output$network <- renderPlot({
+    
+    keywords_cooccurences() %>% 
+      # filter(n > 1) %>%
+      igraph::graph_from_data_frame() %>%
+      ggraph(layout = 'fr') +
+      geom_edge_link(aes(edge_alpha = n, edge_color = n, edge_width = n)) +
+      geom_node_point(color = "darkslategray4", alpha = 0.5 , size = 5) +
+      geom_node_text(aes(label = name), repel = TRUE) +
+      scale_edge_color_viridis(name ="N. of co-occurrence", option = "A") +
+      scale_edge_width_continuous(range = c(1, 3), guide = "none") +
+      scale_edge_alpha(guide = "none") +
+      theme_void() +
+      theme(legend.position = "bottom")
+      
+      })
+
+    
   
   ## observeEvent ----
   
