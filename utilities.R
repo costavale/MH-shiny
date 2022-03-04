@@ -6,6 +6,25 @@ data <-
   read.csv("data/database_selected.csv")
 
 
+graphs <- 
+  data %>%
+  ggplot() +
+  labs(y = "# of observations") +
+  guides(
+    fill = guide_legend(
+      ncol = 3,
+      title.position = "top",
+      title.theme = element_text(face = "bold",
+                                 size = 11)
+    )
+  ) +
+  theme_bw() +
+  theme(legend.position = "bottom",
+        text = element_text(size = 11),
+        axis.text.x = element_text(angle = 30))
+
+
+
 # ## create a selected dataset ----
 # 
 data_selected <- reactive({
