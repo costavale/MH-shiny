@@ -5,7 +5,7 @@ output: html_document
 
 ## MH-shiny: <img src="images/Marine-Hazard-logo.svg" alt="logo" width="200"/> web application
 
-The code of **MH-shiny** is freely available on <https://github.com/costavale/MH-shiny/>. <br>
+The code and the entire dataset of **MH-shiny** are freely available on <https://github.com/costavale/MH-shiny/>. <br>
 For those users who are not familiar with R, a simplified version is available at the following link: <https://costavale.shinyapps.io/MH-shiny/>
 
 <br>

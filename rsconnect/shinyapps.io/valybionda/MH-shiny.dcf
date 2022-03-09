@@ -1,0 +1,13 @@
+name: MH-shiny
+title:
+username:
+account: valybionda
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 5683000
+bundleId: 5661420
+url: https://costavale.shinyapps.io/MH-shiny/
+when: 1646834938.20526
+lastSyncTime: 1646834938.20526
+asMultiple: FALSE
+asStatic: FALSE

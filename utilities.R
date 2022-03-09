@@ -252,4 +252,29 @@ data_2 <-
   
 
 
+tidy_words <-
+  data %>%
+  distinct(doi, .keep_all = T) %>%
+  tidytext::unnest_tokens(
+    output = word,
+    input = index_keywords,
+    token = "regex",
+    pattern = ";"
+  ) %>%
+  filter(!is.na(word)) %>%
+  mutate(word = str_squish(word)) %>%
+  count(word, sort = T)
+
+
+keywords_cooccurences <- 
+  data %>%
+  distinct(doi, .keep_all = T) %>% 
+  tidytext::unnest_tokens(output = word,
+                input = author_keywords,
+                token = "regex",
+                pattern=";") %>%
+  filter(!is.na(word))  %>% 
+  widyr::pairwise_count(item = word, 
+                 feature = label, sort = TRUE)
+
   
