@@ -60,7 +60,10 @@ ui <- fluidPage(
                             width = "250px"), offset = 1),
                  column(6, img(src = "vulcano.png",
                                height = "480px",
-                               width = "640px"))),
+                               width = "640px"),
+                        fluidRow(
+                        column(12, "Shallow Hydrothermal vent emissions in Vulcano 
+                        Island (Aeolian Archipelago, Italy).")))),
                hr(),
                helpText("Info from http://www.marinehazard.cnr.it.", align = "center")
 
