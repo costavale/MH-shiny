@@ -447,8 +447,10 @@ server <- function(input, output, session) {
     req(input$var1)
     
     graphs() +
-      geom_bar(aes_string(x = input$var1, fill = input$var1),
-                     color = "black")
+      geom_bar(aes_string(
+        x = input$var1, 
+        fill = input$var1), 
+        color = "black")
       
 
   })
