@@ -335,12 +335,16 @@ server <- function(input, output, session) {
     
     renderPrint({
       
-      HTML(paste0("Selection: ", "<b>", 
-                  input$area, 
-                  ", ", input$site, 
-                  ", ", input$site_type,
-                  ", ", input$country,
-                  "</b>"))
+      HTML(paste(
+        "Selection: ",
+        "<b>",
+        c(input$area,
+          input$site,
+          input$site_type,
+          input$country),
+        "</b>",
+        sep = ", "
+      ))
       
     })
   
@@ -418,41 +422,39 @@ server <- function(input, output, session) {
     req(data_selected)
     
     graphs <- 
-      data_selected() %>%
-      ggplot() +
+      ggplot(data = data_selected()) +
       labs(y = "# of observations") +
       guides(
         fill = guide_legend(
           ncol = 3,
           title.position = "top",
           title.theme = element_text(face = "bold",
-                                     size = 11)
+                                     size = 12)
         )
       ) +
       theme_bw() +
       theme(legend.position = "bottom",
-            text = element_text(size = 11),
+            text = element_text(size = 12),
             axis.text.x = element_text(angle = 30, 
                                        vjust = 1,
                                        hjust = 1))
     
   })
   
-  
-  
+
   ## graph-01 ----
 
   output$graph_01 <- renderPlot({
 
     req(input$var1)
     
-    graphs() +
-      geom_bar(aes_string(
+    graphs() + 
+      geom_bar(
+        aes_string(
         x = input$var1, 
         fill = input$var1), 
         color = "black")
       
-
   })
   
   ## graph-02 ----
@@ -461,10 +463,12 @@ server <- function(input, output, session) {
 
     req(input$var2)
     
-    graphs() +
-      geom_bar(aes_string(x = input$var2, 
-                          fill = input$var2),
-               color = "black") 
+    graphs() + 
+      geom_bar(aes_string(
+        x = input$var2, 
+        fill = input$var2), 
+        color = "black") 
+    
 
   })
   
