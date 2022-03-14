@@ -10,7 +10,8 @@ library(sf)
 library(sp)
 library(tidyverse)
 library(shiny)
-library(shinythemes)
+# library(shinythemes)
+library(bslib) # themes for shiny
 library(DT)
 library(RColorBrewer)
 library(reactable)
@@ -42,7 +43,9 @@ data <- read.csv("data/database_selected.csv")
 
 ui <- fluidPage(
   
-  theme = shinytheme("simplex"),
+  # theme = shinythemes::shinytheme("simplex"),
+  
+  theme = bs_theme(version = 3, "simplex"),
   
   navbarPage(
     "Marine Hazard",
