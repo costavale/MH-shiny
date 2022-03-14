@@ -10,7 +10,6 @@ library(sf)
 library(sp)
 library(tidyverse)
 library(shiny)
-# library(shinythemes)
 library(bslib) # themes for shiny
 library(DT)
 library(RColorBrewer)
@@ -42,8 +41,6 @@ data <- read.csv("data/database_selected.csv")
 # shiny-ui ----------------------------------------------------------------
 
 ui <- fluidPage(
-  
-  # theme = shinythemes::shinytheme("simplex"),
   
   theme = bs_theme(version = 3, "simplex"),
   
