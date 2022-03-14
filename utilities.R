@@ -6,6 +6,10 @@ data <-
   read.csv("data/database_selected.csv")
 
 
+data2 <-
+  database_selected %>% 
+  filter(bio_group != "NA")
+
 graphs <- 
   data %>%
   ggplot() +

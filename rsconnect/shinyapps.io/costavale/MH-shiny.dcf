@@ -5,9 +5,9 @@ account: costavale
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 5683000
-bundleId: 5681150
+bundleId: 5682032
 url: https://costavale.shinyapps.io/MH-shiny/
-when: 1647256408.27745
-lastSyncTime: 1647256408.27745
+when: 1647269307.1332
+lastSyncTime: 1647269307.1332
 asMultiple: FALSE
 asStatic: FALSE

@@ -105,7 +105,6 @@ ui <- fluidPage(
             multiple = TRUE
           ),
           
-         
             selectInput(
             "area",
             "Select an Area",
@@ -114,7 +113,6 @@ ui <- fluidPage(
             multiple = TRUE
           ),
           
-         
             selectInput("site",
             "Select a Site Name",
             choices = levels(factor(data$site)),
@@ -130,15 +128,6 @@ ui <- fluidPage(
             selected = NULL,
             multiple = TRUE
           ),
-          
-
-          # sliderInput(
-          #   "int_depth",
-          #   label = "Depth range",
-          #   min = min(data$avg_depth),
-          #   max = max(data$avg_depth),
-          #   value = c(min(data$avg_depth), max(data$avg_depth))
-          # ),
           
           actionButton("int_clear", "Clear selection")
         )
@@ -167,8 +156,8 @@ ui <- fluidPage(
           column(9, reactableOutput("table01", height = "auto"),
                  downloadButton("download_filtered", 
                                 label = "Download the selected data")),
-          column(3, shinycssloaders::withSpinner(plotOutput("graph_01", height = "40vh")),
-                 shinycssloaders::withSpinner(plotOutput("graph_02", height = "40vh")))
+          column(3, shinycssloaders::withSpinner(plotOutput("graph_01", height = "45vh")),
+                 shinycssloaders::withSpinner(plotOutput("graph_02", height = "45vh")))
         )
         
       )
@@ -207,7 +196,7 @@ ui <- fluidPage(
             numericInput(
               "max",
               "Maximum Number of Words:",
-              value = 100
+              value = 150
             ),
             hr(),
             h4("Words frequency"),
@@ -218,7 +207,7 @@ ui <- fluidPage(
             h4("Network analysis"),
             numericInput("net_min", 
                          "Minimum frequency:",
-                         value = 5),
+                         value = 0),
             hr(),
             actionButton("int_clear_2", "Clear selection"),
             width = 3
@@ -416,62 +405,55 @@ server <- function(input, output, session) {
     }
   )
   
-  ## render graphs ----
-  
-  graphs <- reactive({
-    
-    req(data_selected)
-    
-    graphs <- 
-      ggplot(data = data_selected()) +
-      labs(y = "# of observations") +
-      guides(
-        fill = guide_legend(
-          ncol = 3,
-          title.position = "top",
-          title.theme = element_text(face = "bold",
-                                     size = 12)
-        )
-      ) +
-      theme_bw() +
-      theme(legend.position = "bottom",
-            text = element_text(size = 12),
-            axis.title = element_text(face = "bold"),
-            axis.text.x = element_text(angle = 30, 
-                                       vjust = 1,
-                                       hjust = 1))
-    
-  })
-  
-
-  ## graph-01 ----
+  ## render graph-01 ----
 
   output$graph_01 <- renderPlot({
 
     req(input$var1)
+    req(data_selected)
     
-    graphs() + 
-      geom_bar(
-        aes_string(
-        x = input$var1, 
-        fill = input$var1), 
-        color = "black")
-      
+    data_selected() %>%
+      filter(data_selected()[input$var1] != "") %>%
+      ggplot() +
+    geom_bar(aes_string(
+      x = input$var1,
+      fill = input$var1),
+      color = "black") +
+      labs(y = "# of observations") +
+      theme_bw() +
+      theme(legend.position = "none",
+            text = element_text(size = 12),
+            axis.title = element_text(face = "bold"),
+            axis.text.x = element_text(angle = 35,
+                                       vjust = 1,
+                                       hjust = 1))
+
+   
   })
   
-  ## graph-02 ----
+  ## render graph-02 ----
 
   output$graph_02 <- renderPlot({
 
     req(input$var2)
+    req(data_selected)
     
-    graphs() + 
+    data_selected() %>%
+      filter(data_selected()[input$var2] != "") %>%
+      ggplot() +
       geom_bar(aes_string(
-        x = input$var2, 
-        fill = input$var2), 
-        color = "black") 
+        x = input$var2,
+        fill = input$var2),
+        color = "black") +
+      labs(y = "# of observations") +
+      theme_bw() +
+      theme(legend.position = "none",
+            text = element_text(size = 12),
+            axis.title = element_text(face = "bold"),
+            axis.text.x = element_text(angle = 35,
+                                       vjust = 1,
+                                       hjust = 1))
     
-
   })
   
   ## create the tidy_words dataset ----
@@ -625,7 +607,7 @@ server <- function(input, output, session) {
   output$network <- renderPlot({
     
     keywords_cooccurences() %>% 
-      # filter(n > input$net_min) %>%
+      filter(n > input$net_min) %>%
       igraph::graph_from_data_frame() %>%
       ggraph(layout = 'fr') +
       geom_edge_link(aes(edge_alpha = n, edge_color = n, edge_width = n)) +
