@@ -2,6 +2,8 @@
 # create by Valentina Costa
 # 2021
 
+# to publish .rs.files.restoreBindings() 
+
 # library -----------------------------------------------------------------
 
 library(htmltools)
@@ -10,7 +12,6 @@ library(sf)
 library(sp)
 library(tidyverse)
 library(shiny)
-library(bslib) # themes for shiny
 library(DT)
 library(RColorBrewer)
 library(reactable)
@@ -42,7 +43,7 @@ data <- read.csv("data/database_selected.csv")
 
 ui <- fluidPage(
   
-  theme = bs_theme(version = 3, "simplex"),
+  theme = bslib::bs_theme(version = 3, "simplex"),
   
   navbarPage(
     "Marine Hazard",
