@@ -167,8 +167,8 @@ ui <- fluidPage(
           column(9, reactableOutput("table01", height = "auto"),
                  downloadButton("download_filtered", 
                                 label = "Download the selected data")),
-          column(3, plotOutput("graph_01", height = "40vh"),
-                      plotOutput("graph_02", height = "40vh"))
+          column(3, shinycssloaders::withSpinner(plotOutput("graph_01", height = "40vh")),
+                 shinycssloaders::withSpinner(plotOutput("graph_02", height = "40vh")))
         )
         
       )
@@ -226,9 +226,9 @@ ui <- fluidPage(
           
           # Show Word Cloud
           mainPanel(
-            fluidRow(column(6, plotOutput("cloud")),
-                    column(6, plotOutput("frequencies"))),
-            fluidRow(column(12, plotOutput("network"))))
+            fluidRow(column(6, shinycssloaders::withSpinner(plotOutput("cloud"))),
+                    column(6, shinycssloaders::withSpinner(plotOutput("frequencies")))),
+            fluidRow(column(12, shinycssloaders::withSpinner(plotOutput("network")))))
         )
       )
     ),
@@ -436,6 +436,7 @@ server <- function(input, output, session) {
       theme_bw() +
       theme(legend.position = "bottom",
             text = element_text(size = 12),
+            axis.title = element_text(face = "bold"),
             axis.text.x = element_text(angle = 30, 
                                        vjust = 1,
                                        hjust = 1))
@@ -484,11 +485,11 @@ server <- function(input, output, session) {
         distinct(doi, .keep_all = T) %>%
         tidytext::unnest_tokens(
           output = word,
-          input = abstract,
-          token = "regex",
-          pattern = ";"
+          input = input$selection,
+          token = "words"
         ) %>%
         filter(!is.na(word)) %>%
+        anti_join(tidytext::get_stopwords()) %>%
         mutate(word = str_squish(word)) %>%
         count(word, sort = T)
       
@@ -505,8 +506,7 @@ server <- function(input, output, session) {
           token = "words"
         ) %>%
         filter(!is.na(word)) %>%
-        anti_join(get_stopwords()) %>%
-        anti_join(removing_word) %>% 
+        anti_join(tidytext::get_stopwords()) %>%
         mutate(word = str_squish(word)) %>%
         count(word, sort = T)
       
@@ -555,8 +555,15 @@ server <- function(input, output, session) {
   
   wordcloud_rep <- repeatable(wordcloud)
   
+
   output$cloud <- renderPlot({
-      tidy_words() %>%
+      
+    layout(matrix(c(1, 2), nrow=2), heights=c(1, 4))
+    par(mar=c(0, 0, 0, 0))
+    plot.new()
+    text(x=0.5, y=0.5, cex = 1.5, "Wordcloud")
+
+    tidy_words() %>%
         with(
           wordcloud_rep(
             word,
