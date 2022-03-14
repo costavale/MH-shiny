@@ -657,8 +657,7 @@ server <- function(input, output, session) {
           popup = ~ paste0(
             "<b>Country: </b>", country, "<br>",
             "<b>Name: </b>", site, "<br>",
-            "<b>Range depth: </b>", min(avg_depth), "-", max(data$avg_depth), 
-            " m", "<br>"), 
+            "<b>Depth: </b>", avg_depth, " m", "<br>"), 
           popupOptions = popupOptions(closeOnClick = TRUE),
           label = ~ as.character(site),
           labelOptions = labelOptions(
@@ -688,8 +687,7 @@ server <- function(input, output, session) {
           popup = ~ paste0(
             "<b>Country: </b>", country, "<br>",
             "<b>Name: </b>", site, "<br>",
-            "<b>Range depth: </b>", min(avg_depth), "-", max(avg_depth), 
-            " m", "<br>"), 
+            "<b>Depth: </b>", avg_depth, " m", "<br>"), 
           popupOptions = popupOptions(closeOnClick = TRUE),
           label = ~ as.character(site),
           labelOptions = labelOptions(
@@ -721,8 +719,7 @@ server <- function(input, output, session) {
           popup = ~ paste0(
             "<b>Country: </b>", country, "<br>",
             "<b>Name: </b>", site, "<br>",
-            "<b>Range depth: </b>", min(avg_depth), "-", max(data$avg_depth), 
-            " m", "<br>"), 
+            "<b>Depth: </b>", avg_depth, " m", "<br>"), 
           popupOptions = popupOptions(closeOnClick = TRUE),
           label = ~ as.character(site),
           labelOptions = labelOptions(
@@ -753,8 +750,7 @@ server <- function(input, output, session) {
           popup = ~ paste0(
             "<b>Country: </b>", country, "<br>",
             "<b>Name: </b>", site, "<br>",
-            "<b>Range depth: </b>", min(avg_depth), "-", max(data$avg_depth), 
-            " m", "<br>"), 
+            "<b>Depth: </b>", avg_depth, " m", "<br>"), 
           popupOptions = popupOptions(closeOnClick = TRUE),
           label = ~ as.character(site),
           labelOptions = labelOptions(
