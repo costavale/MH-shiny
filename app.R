@@ -217,7 +217,7 @@ ui <- fluidPage(
           mainPanel(
             fluidRow(column(6, shinycssloaders::withSpinner(plotOutput("cloud"))),
                     column(6, shinycssloaders::withSpinner(plotOutput("frequencies")))),
-            fluidRow(column(12, shinycssloaders::withSpinner(plotOutput("network")))))
+            fluidRow(column(12, shinycssloaders::withSpinner(plotOutput("network", height = "60vh")))))
         )
       )
     ),
@@ -540,8 +540,8 @@ server <- function(input, output, session) {
 
   output$cloud <- renderPlot({
       
-    layout(matrix(c(1, 2), nrow=2), heights=c(1, 4))
-    par(mar=c(0, 0, 0, 0))
+    layout(matrix(c(1, 2), nrow=2), heights=c(0.3, 4))
+    par(mar = rep(0, 4))
     plot.new()
     text(x=0.5, y=0.5, cex = 1.5, "Wordcloud")
 
