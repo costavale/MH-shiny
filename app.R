@@ -620,7 +620,6 @@ server <- function(input, output, session) {
     })
     
     
-  
   ## graph of network co-occurrence
   
   output$network <- renderPlot({
