@@ -383,6 +383,7 @@ server <- function(input, output, session) {
                       })
       ),
       height = 700,
+      filterable = TRUE,
       outlined = TRUE,
       bordered = TRUE,
       highlight = TRUE,
