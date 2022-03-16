@@ -214,10 +214,14 @@ ui <- fluidPage(
           ),
           
           # Show Word Cloud
-          mainPanel(
-            fluidRow(column(6, shinycssloaders::withSpinner(plotOutput("cloud"))),
-                    column(6, shinycssloaders::withSpinner(plotOutput("frequencies")))),
-            fluidRow(column(12, shinycssloaders::withSpinner(plotOutput("network", height = "60vh")))))
+          mainPanel(fluidRow(
+            column(6, shinycssloaders::withSpinner(plotOutput("cloud"))),
+            column(6, shinycssloaders::withSpinner(plotOutput("frequencies")))
+          ),
+          fluidRow(column(
+            12,
+            shinycssloaders::withSpinner(plotOutput("network", height = "60vh"))
+          )))
         )
       )
     ),
