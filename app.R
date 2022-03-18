@@ -2,7 +2,6 @@
 # create by Valentina Costa
 # 2021
 
-# to publish .rs.files.restoreBindings() 
 
 # library -----------------------------------------------------------------
 
@@ -66,7 +65,8 @@ ui <- fluidPage(
                         column(12, "Shallow Hydrothermal vent emissions in Vulcano 
                         Island (Aeolian Archipelago, Italy).")))),
                hr(),
-               helpText("Info from http://www.marinehazard.cnr.it.", align = "center")
+               helpText("Info from http://www.marinehazard.cnr.it.", 
+                        align = "center")
 
              )),
     
@@ -142,7 +142,10 @@ ui <- fluidPage(
         
         hr(),
         fluidRow(
-          column(3, htmlOutput("selection_1"), offset = 1),
+          column(3, htmlOutput("country_1"), 
+                 htmlOutput("area_1"), 
+                 htmlOutput("site_name_1"),
+                 htmlOutput("site_type_1")),
           column(3, selectInput("var1", "Choose a variable to visualize:", 
                                 choices = c("", names(data)[c(3, 4, 10:12, 15:25)]),
                                 selected = "")),
@@ -171,7 +174,10 @@ ui <- fluidPage(
         
         hr(),
         fluidRow(
-          column(3, htmlOutput("selection_2"), offset = 1),
+          column(3, htmlOutput("country_2")), 
+          column(3, htmlOutput("area_2")), 
+          column(3, htmlOutput("site_name_2")),
+          column(3, htmlOutput("site_type_2"))
         ),
         hr(),
 
@@ -323,26 +329,49 @@ server <- function(input, output, session) {
       
     })
   
-  ## Selection ----
-  
-  output$selection_1 <- output$selection_2 <-
-    
+  # ## Selection ----
+ 
+  output$country_1 <- output$country_2 <- 
+
     renderPrint({
-      
       HTML(paste(
-        "Selection: ",
-        "<b>",
-        c(input$area,
-          input$site,
-          input$site_type,
-          input$country),
+        "<b>", "Country: ",
         "</b>",
-        sep = ", "
+        input$country
       ))
-      
     })
+
   
-  
+  output$area_1 <- output$area_2 <- 
+
+    renderPrint({
+      HTML(paste(
+        "<b>", "Area: ",
+        "</b>",
+        input$area
+      ))
+    })
+
+  output$site_name_1 <- output$site_name_2 <- 
+
+    renderPrint({
+      HTML(paste(
+        "<b>", "Site: ",
+        "</b>",
+        input$site
+      ))
+    })
+
+  output$site_type_1 <- output$site_type_2 <- 
+
+    renderPrint({
+      HTML(paste(
+        "<b>", "Site Type: ",
+        "</b>",
+        input$site_type
+      ))
+    })
+
   ## create a selected dataset ----
 
   data_selected <- reactive({
@@ -607,7 +636,7 @@ server <- function(input, output, session) {
     })
     
     
-  ## graph of network co-occurrence
+  ## graph of network co-occurrence ----
   
   output$network <- renderPlot({
     
