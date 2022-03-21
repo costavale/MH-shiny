@@ -12,6 +12,10 @@ For more details about the project see <http://www.marinehazard.cnr.it>.
 
 <br>
 
+<img src="www/SZN.png" width="242"/>
+
+<br>
+
 The Shiny app was created using the following packages:
 
 -   *htmltools*, Joe Cheng, Carson Sievert, Barret Schloerke, Winston Chang, Yihui Xie and Jeff Allen (2021). htmltools: Tools for HTML. R package version 0.5.2. <https://CRAN.R-project.org/package=htmltools>
