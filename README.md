@@ -1,4 +1,4 @@
-## MH-shiny: ![](inst/Rmarkdown/images/Marine-Hazard-logo.svg) web application
+## MH-shiny: <img src="inst/Rmarkdown/images/Marine-Hazard-logo.svg" width="158" height="22"/> web application
 
 **MH-shiny** is an Open Source tool created within the framework of the Marine Hazard project.
 
