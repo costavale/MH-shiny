@@ -187,8 +187,7 @@ ui <- fluidPage(
             selectInput(
               "selection",
               "Select:",
-              choices = c("abstract", "title",
-                          "author_keywords", "index_keywords"),
+              choices = c("author_keywords", "index_keywords"),
               selected = "author_keywords",
               multiple = FALSE
             ),
@@ -493,40 +492,6 @@ server <- function(input, output, session) {
   ## create the tidy_words dataset ----
   
   tidy_words <- reactive({
-    
-    if (input$selection == "abstract") {
-      
-      tidy_words <-
-        data_selected() %>%
-        distinct(doi, .keep_all = T) %>%
-        tidytext::unnest_tokens(
-          output = word,
-          input = input$selection,
-          token = "words"
-        ) %>%
-        filter(!is.na(word)) %>%
-        anti_join(tidytext::get_stopwords()) %>%
-        mutate(word = str_squish(word)) %>%
-        count(word, sort = T)
-      
-    }
-    
-    if (input$selection == "title") {
-      
-      tidy_words <-
-        data_selected() %>%
-        distinct(doi, .keep_all = T) %>%
-        tidytext::unnest_tokens(
-          output = word,
-          input = title,
-          token = "words"
-        ) %>%
-        filter(!is.na(word)) %>%
-        anti_join(tidytext::get_stopwords()) %>%
-        mutate(word = str_squish(word)) %>%
-        count(word, sort = T)
-      
-    }
     
     if (input$selection == "author_keywords") {
     
