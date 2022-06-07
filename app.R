@@ -94,7 +94,7 @@ ui <- fluidPage(
           width = 290,
           height = "auto",
           
-          h4(HTML("<b> Select one variable at a time </b>")),
+          h4(HTML("<b> Select only one variable at a time </b>")),
           hr(),
         
           selectInput(
