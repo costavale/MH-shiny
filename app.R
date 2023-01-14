@@ -107,7 +107,7 @@ ui <- fluidPage(
           
             selectInput(
             "area",
-            "Select an Area",
+            "Select a Region",
             choices = levels(factor(data$area)),
             selected = NULL,
             multiple = TRUE
@@ -146,10 +146,10 @@ ui <- fluidPage(
                  htmlOutput("area_1"), 
                  htmlOutput("site_name_1"),
                  htmlOutput("site_type_1")),
-          column(3, selectInput("var1", "Choose a variable to visualize:", 
+          column(3, selectInput("var1", "Graph 1: Variable to visualize", 
                                 choices = c("", names(data)[c(3, 4, 10:12, 15:25)]),
                                 selected = "")),
-          column(3, selectInput("var2", "Choose a variable to visualize:", 
+          column(3, selectInput("var2", "Graph 2: Variable to visualize:", 
                                 choices = c("", names(data)[c(3, 4, 10:12, 15:25)]),
                                 selected = ""))
         ),
@@ -158,7 +158,11 @@ ui <- fluidPage(
         fluidRow(
           column(9, reactableOutput("table01", height = "auto"),
                  downloadButton("download_filtered", 
-                                label = "Download the selected data")),
+                                label = "Download the selected data"), 
+                 downloadButton("SaveGraph01", 
+                         label = "Download Graph 01"),
+                 downloadButton("SaveGraph02", 
+                                label = "Download Graph 02")),
           column(3, shinycssloaders::withSpinner(plotOutput("graph_01", height = "45vh")),
                  shinycssloaders::withSpinner(plotOutput("graph_02", height = "45vh")))
         )
@@ -345,7 +349,7 @@ server <- function(input, output, session) {
 
     renderPrint({
       HTML(paste(
-        "<b>", "Area: ",
+        "<b>", "Region: ",
         "</b>",
         input$area
       ))
@@ -437,10 +441,30 @@ server <- function(input, output, session) {
       write.csv(s[c(1:4, 6)], file)
     }
   )
-  
+
+  ## download the Graph 01 ----
+  output$SaveGraph01 <- downloadHandler(
+    filename = function(file) {
+      "graph_01.png"
+    },
+    content = function(file) {
+      ggsave(file, plot = graph_01(), device = "png")
+    }
+  )
+
+  ## download the Graph 02 ----
+  output$SaveGraph02 <- downloadHandler(
+    filename = function(file) {
+      "graph_02.png"
+    },
+    content = function(file) {
+      ggsave(file, plot = graph_02(), device = "png")
+    }
+  )
+    
   ## render graph-01 ----
 
-  output$graph_01 <- renderPlot({
+  graph_01 <- reactive({
 
     req(input$var1)
     req(data_selected)
@@ -464,9 +488,13 @@ server <- function(input, output, session) {
    
   })
   
+  output$graph_01 <- renderPlot({
+    graph_01()  
+  })
+  
   ## render graph-02 ----
 
-  output$graph_02 <- renderPlot({
+  graph_02 <- reactive({
 
     req(input$var2)
     req(data_selected)
@@ -487,6 +515,10 @@ server <- function(input, output, session) {
                                        vjust = 1,
                                        hjust = 1))
     
+  })
+  
+  output$graph_02 <- renderPlot({
+    graph_02()  
   })
   
   ## create the tidy_words dataset ----
