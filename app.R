@@ -65,7 +65,13 @@ ui <- fluidPage(
                         column(12, "Shallow Hydrothermal vent emissions in Vulcano 
                         Island (Aeolian Archipelago, Italy).")))),
                hr(),
-               helpText("Info from http://www.marinehazard.cnr.it.", 
+               helpText("MH-shiny was published as part of the publication:",
+                        br(),
+                        "Costa V, Sciutteri V, Consoli P, Manea E, Menini E, 
+                        Andaloro F, Romeo T, Danovaro R. 
+                        Volcanic-associated ecosystems of the Mediterranean Sea: 
+                        a Systematic Map and an Interactive Tool to support their 
+                        conservation. (Under review). ",
                         align = "center")
 
              )),
