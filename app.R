@@ -1,6 +1,15 @@
-# MH-shiny
-# create by Valentina Costa
+# MH-shiny: Marine Hazard Web Application
+
+# created by Valentina Costa
 # 2021
+
+# MH-shiny was published as part of the publication: 
+# Costa V, Sciutteri V, Consoli P, Manea E, Menini E, 
+# Andaloro F, Romeo T, Danovaro R. 
+# Volcanic-associated ecosystems of the Mediterranean Sea: 
+# a Systematic Map and an Interactive Tool to support their conservation. (Under review).
+# PeerJ
+# 2023
 
 
 # library -----------------------------------------------------------------
@@ -16,6 +25,7 @@ library(RColorBrewer)
 library(reactable)
 library(wordcloud)
 library(ggraph)
+library(shinyWidgets)
 
 # dataset -----------------------------------------------------------------
 
@@ -71,7 +81,9 @@ ui <- fluidPage(
                         Andaloro F, Romeo T, Danovaro R. 
                         Volcanic-associated ecosystems of the Mediterranean Sea: 
                         a Systematic Map and an Interactive Tool to support their 
-                        conservation. (Under review). ",
+                        conservation. PeerJ. DOI:",
+                        br(),
+                        "DOI: 10.5281/zenodo.7537047",
                         align = "center")
 
              )),
@@ -97,45 +109,29 @@ ui <- fluidPage(
           left = "auto",
           right = 20,
           bottom = "auto",
-          width = 290,
+          width = 320,
           height = "auto",
           
-          h4(HTML("<b> Select only one variable at a time </b>")),
+          h4(HTML("<b> Volcanic-Associated Ecosystems </b>")),
           hr(),
         
-          selectInput(
-            "country",
-            "Select a Country",
-            choices = levels(factor(data$country)),
-            selected = NULL,
-            multiple = TRUE
+          selectizeGroupUI(
+            id = "my-filters",
+            inline = FALSE,
+            params = list(
+              country = list(inputId = "country", 
+                             title = "Select a Country", placeholder = 'select'),
+              area = list(inputId = "area", 
+                             title = "Select a Region", placeholder = 'select'),
+              sitee = list(inputId = "site", 
+                               title = "Select a Site", placeholder = 'select'),
+              site_type = list(inputId = "site_type", 
+                              title = "Select the Site Type", placeholder = 'select')
+            ), 
+            btn_label = "Reset all filters"
           ),
           
-            selectInput(
-            "area",
-            "Select a Region",
-            choices = levels(factor(data$area)),
-            selected = NULL,
-            multiple = TRUE
-          ),
-          
-            selectInput("site",
-            "Select a Site Name",
-            choices = levels(factor(data$site)),
-            selected = NULL,
-            multiple = TRUE
-          ),
-          
-         
-            selectInput(
-            "site_type",
-            "Select the Site Type",
-            choices = levels(factor(data$site_type)),
-            selected = NULL,
-            multiple = TRUE
-          ),
-          
-          actionButton("int_clear", "Clear selection")
+          actionButton("int_clear", "Clear map")
         )
       )
     ),
@@ -284,7 +280,7 @@ server <- function(input, output, session) {
       leaflet() %>%
         addProviderTiles(providers$CartoDB.Positron) %>%
         setView(15, 37, zoom = 4.5) %>%
-        addMeasure(position = "bottomleft") 
+        addMeasure(position = "bottomleft")  
       
       # %>%
         
@@ -346,7 +342,7 @@ server <- function(input, output, session) {
       HTML(paste(
         "<b>", "Country: ",
         "</b>",
-        input$country
+        input[["my-filters-country"]]
       ))
     })
 
@@ -357,7 +353,8 @@ server <- function(input, output, session) {
       HTML(paste(
         "<b>", "Region: ",
         "</b>",
-        input$area
+        input[["my-filters-area"]]
+        # input$area
       ))
     })
 
@@ -367,7 +364,7 @@ server <- function(input, output, session) {
       HTML(paste(
         "<b>", "Site: ",
         "</b>",
-        input$site
+        input[["my-filters-site"]]
       ))
     })
 
@@ -377,28 +374,20 @@ server <- function(input, output, session) {
       HTML(paste(
         "<b>", "Site Type: ",
         "</b>",
-        input$site_type
+        input[["my-filters-site_type"]]
       ))
     })
 
-  ## create a selected dataset ----
+  
+  ## create the filtered dataset ----
 
-  data_selected <- reactive({
-
-  data_selected <-
-
-      data %>%
-      filter(area %in% input$area |
-               site %in% input$site |
-               site_type %in% input$site_type |
-               country %in% input$country )
-
-    validate(need(nrow(data_selected)!=0,
-    "There are no matches in the dataset. Try removing one or more filters."))
-
-    data_selected
-
-  })
+  data_selected <- callModule(
+    module = selectizeGroupServer,
+    id = "my-filters",
+    data = data,
+    vars = c("country", "area", "site", "site_type"),
+    inline = FALSE
+  )
   
   
   ## create a table of filtered data ----
@@ -480,6 +469,7 @@ server <- function(input, output, session) {
       ggplot() +
     geom_bar(aes_string(
       x = input$var1,
+      group = input$var1,
       fill = input$var1),
       color = "black") +
       labs(y = "# of observations") +
@@ -510,6 +500,7 @@ server <- function(input, output, session) {
       ggplot() +
       geom_bar(aes_string(
         x = input$var2,
+        group = input$var2,
         fill = input$var2),
         color = "black") +
       labs(y = "# of observations") +
@@ -658,145 +649,46 @@ server <- function(input, output, session) {
       
       })
 
-    
+
   
   ## observeEvent ----
   
-  ### input$area ----
-  
-  observeEvent(input$area, {
+  observeEvent(data_selected(), {
     
-    if (input$area != "")
-    
-      {
-      colorData_area <- data[data$area %in% input$area, ]
-      pal_area <- colorFactor("plasma", levels = colorData_area)
-      
-      leafletProxy("map") %>%
-        addCircleMarkers(
-          data = data_selected(),
-          stroke = T,
-          color = "white",
-          weight = 0.2,
-          fillColor = ~ pal_area(colorData_area),
-          popup = ~ paste0(
-            "<b>Country: </b>", country, "<br>",
-            "<b>Name: </b>", site, "<br>",
-            "<b>Depth: </b>", avg_depth, " m", "<br>"), 
-          popupOptions = popupOptions(closeOnClick = TRUE),
-          label = ~ as.character(site),
-          labelOptions = labelOptions(
-            style = list("font-weight" = "normal", padding = "3px 8px"),
-            textsize = "11px",
-            direction = "auto"
-          )
+    leafletProxy("map") %>%
+      clearMarkers() %>%   
+      addCircleMarkers(
+        data = data_selected(),
+        stroke = T,
+        color = "white",
+        weight = 0.2,
+        fillColor = "blue",
+        popup = ~ paste0(
+          "<b>Country: </b>", country, "<br>",
+          "<b>Region: </b>", area, "<br>",
+          "<b>Name: </b>", site, "<br>",
+          "<b>Depth: </b>", avg_depth, " m", "<br>"), 
+        popupOptions = popupOptions(closeOnClick = TRUE),
+        label = ~ as.character(site),
+        labelOptions = labelOptions(
+          style = list("font-weight" = "normal", padding = "3px 8px"),
+          textsize = "11px",
+          direction = "auto"
         )
-    }
-  })
-  
-  ### input$site ----
-  
-  observeEvent(input$site, {
-    if (input$site != "")
-    {
-      colorData_site <- data[data$site %in% input$site, ]
-      pal_site <- colorFactor("magma", levels = colorData_site)
-      
-      leafletProxy("map", session) %>%
-        addCircleMarkers(
-          data = data_selected(),
-          stroke = T,
-          color = "white",
-          weight = 0.2,
-          fillColor = ~ pal_site(colorData_site),
-          popup = ~ paste0(
-            "<b>Country: </b>", country, "<br>",
-            "<b>Name: </b>", site, "<br>",
-            "<b>Depth: </b>", avg_depth, " m", "<br>"), 
-          popupOptions = popupOptions(closeOnClick = TRUE),
-          label = ~ as.character(site),
-          labelOptions = labelOptions(
-            style = list("font-weight" = "normal", padding = "3px 8px"),
-            textsize = "11px",
-            direction = "auto"
-          )
-        )
-    }
-  })
+      )
+  }
+  )
   
   
-  ### input$site_type ----
-  
-  observeEvent(input$site_type, {
-    if (input$site_type != "")
-    {
-      colorData_site_type <- data[data$site_type %in% input$site_type, ]
-      pal_type <-
-        colorFactor("inferno", levels = colorData_site_type)
-      
-      leafletProxy("map") %>%
-        addCircleMarkers(
-          data = data_selected(),
-          stroke = T,
-          color = "white",
-          weight = 0.2,
-          fillColor = ~ pal_type(colorData_site_type),
-          popup = ~ paste0(
-            "<b>Country: </b>", country, "<br>",
-            "<b>Name: </b>", site, "<br>",
-            "<b>Depth: </b>", avg_depth, " m", "<br>"), 
-          popupOptions = popupOptions(closeOnClick = TRUE),
-          label = ~ as.character(site),
-          labelOptions = labelOptions(
-            style = list("font-weight" = "normal", padding = "3px 8px"),
-            textsize = "11px",
-            direction = "auto"
-          )
-        )
-    }
-  })
-  
-  ### input$country ----
-  
-  observeEvent(input$country, {
-    if (input$country != "")
-    {
-      colorData_country <- data[data$country %in% input$country, ]
-      pal_type <-
-        colorFactor("inferno", levels = colorData_country)
-      
-      leafletProxy("map") %>%
-        addCircleMarkers(
-          data = data_selected(),
-          stroke = T,
-          color = "white",
-          weight = 0.2,
-          fillColor = ~ pal_type(colorData_country),
-          popup = ~ paste0(
-            "<b>Country: </b>", country, "<br>",
-            "<b>Name: </b>", site, "<br>",
-            "<b>Depth: </b>", avg_depth, " m", "<br>"), 
-          popupOptions = popupOptions(closeOnClick = TRUE),
-          label = ~ as.character(site),
-          labelOptions = labelOptions(
-            style = list("font-weight" = "normal", padding = "3px 8px"),
-            textsize = "11px",
-            direction = "auto"
-          )
-        )
-    }
-  })
   
   ### input$int_clear ----
   
   observeEvent(
     input$int_clear & input$int_clear_2, {
     
-    updateSelectInput(session, "site", selected = "")
-    updateSelectInput(session, "site_type", selected = "")
-    updateSelectInput(session, "area", selected = "")
-    updateSelectInput(session, "country", selected = "")
-
+    updateSelectizeInput(session, inputId = "my-filters",
+                           selected = "")
+      
     leafletProxy("map") %>% clearMarkers()
     
   })
