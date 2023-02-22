@@ -1,3 +1,5 @@
+[![DOI](https://zenodo.org/badge/463222561.svg)](https://zenodo.org/badge/latestdoi/463222561)
+
 ## MH-shiny: <img src="inst/Rmarkdown/images/Marine-Hazard-logo.svg" width="158" height="22"/> web application
 
 **MH-shiny** is an Open Source tool created within the framework of the Marine Hazard project.
