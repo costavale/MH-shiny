@@ -123,7 +123,7 @@ ui <- fluidPage(
                              title = "Select a Country", placeholder = 'select'),
               area = list(inputId = "area", 
                              title = "Select a Region", placeholder = 'select'),
-              sitee = list(inputId = "site", 
+              site = list(inputId = "site", 
                                title = "Select a Site", placeholder = 'select'),
               site_type = list(inputId = "site_type", 
                               title = "Select the Site Type", placeholder = 'select')
@@ -281,10 +281,9 @@ server <- function(input, output, session) {
         addProviderTiles(providers$CartoDB.Positron) %>%
         setView(15, 37, zoom = 4.5) %>%
         addMeasure(position = "bottomleft")  
-      
       # %>%
-        
-      #   ### add MPA polygons ----
+      # 
+      # #   ### add MPA polygons ----
       #   addPolygons(data = MPA_med_national,
       #             color = "green",
       #             stroke = T,
@@ -296,20 +295,20 @@ server <- function(input, output, session) {
       #               direction = "auto"),
       #             group = "MPA (green)") %>%
       # 
-      #   ### add Nature2000 polygons ----
+      # #   ### add Nature2000 polygons ----
       # addPolygons(data = MPA_med_NATURA2000,
       #             color = "orange",
       #             stroke = T,
       #             weight = 1,
       #             label = mylabels_Nat2000,
       #             labelOptions = labelOptions(
-      #               style = list("font-weight" = "normal", 
+      #               style = list("font-weight" = "normal",
       #                            padding = "3px 8px"),
       #               textsize = "11px",
       #               direction = "auto"),
       #             group = "Nature 2000 (orange)") %>%
       # 
-      #   ### add ProposedNature2000 polygons ----
+      # #   ### add ProposedNature2000 polygons ----
       # addPolygons(data = MPA_med_pNATURA2000,
       #             color = "grey",
       #             stroke = T,
@@ -320,8 +319,8 @@ server <- function(input, output, session) {
       #               textsize = "11px",
       #               direction = "auto"),
       #             group = "Proposed Nature 2000 (grey)") %>%
-      
-      #   ### add Layers control ----
+      # 
+      # #   ### add Layers control ----
       # addLayersControl(
       #   overlayGroups = c(
       #     "MPA (green)",
