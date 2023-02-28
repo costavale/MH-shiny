@@ -4,6 +4,8 @@
 
 **MH-shiny** is an Open Source tool created within the framework of the Marine Hazard project.
 
+An online version of the app is accessible at <https://costavale.shinyapps.io/MH-shiny/>. 
+
 The central objective of the project is the creation of an integrated system of skills on the territory able to deal with relevant aspects regarding environmental risk -- with a specific focus on the marine-coastal system -- in a modern and effective way.
 
 The results obtained, through four specific areas of action, aim at the construction of technological prototypes for the management of the hazard in the coastal marine environment in the areas of interest of the project. Marine Hazard will therefore lead to the creation of skills on the territory capable of effectively addressing relevant aspects of risk mitigation in the marine environment.
