@@ -640,7 +640,7 @@ server <- function(input, output, session) {
       geom_edge_link(aes(edge_alpha = n, edge_color = n, edge_width = n)) +
       geom_node_point(color = "darkslategray4", alpha = 0.5 , size = 5) +
       geom_node_text(aes(label = name), repel = TRUE) +
-      scale_edge_color_viridis(name ="N. of co-occurrence", option = "A") +
+      scale_edge_color_viridis(name ="N. of co-occurrence", option = "A", guide = "none") +
       scale_edge_width_continuous(range = c(1, 3), guide = "none") +
       scale_edge_alpha(guide = "none") +
       theme_void() +
