@@ -78,10 +78,13 @@ ui <- fluidPage(
                helpText("MH-shiny was published as part of the publication:",
                         br(),
                         "Costa V, Sciutteri V, Consoli P, Manea E, Menini E, 
-                        Andaloro F, Romeo T, Danovaro R. 2023.
-                        Volcanic-associated ecosystems of the Mediterranean Sea: 
+                        Andaloro F, Romeo T, Danovaro R. 2023.",
+                        br(),
+                        "Volcanic-associated ecosystems of the Mediterranean Sea: 
                         a Systematic Map and an Interactive Tool to support their 
-                        conservation. PeerJ 11:e15162 DOI 10.7717/peerj.15162",
+                        conservation.",
+                        br(),
+                        "PeerJ 11:e15162 DOI: 10.7717/peerj.15162",
                         br(),
                         "DOI: 10.5281/zenodo.7537047",
                         align = "center")
