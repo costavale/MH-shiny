@@ -7,8 +7,9 @@
 # Costa V, Sciutteri V, Consoli P, Manea E, Menini E, 
 # Andaloro F, Romeo T, Danovaro R. 
 # Volcanic-associated ecosystems of the Mediterranean Sea: 
-# a Systematic Map and an Interactive Tool to support their conservation. (Under review).
-# PeerJ
+# a Systematic Map and an Interactive Tool to support their conservation. 
+# PeerJ Life & Environment
+# DOI: 10.7717/peerj.15162
 # 2023
 
 
@@ -32,12 +33,15 @@ library(shinyWidgets)
 # database-systematic map
 data <- read.csv("data/database_selected.csv")
 
+# The layers related to the National MPA, Natura 2000 sites and Proposed
+# Natura 2000 sites can be visualized in the Shiny-app
+
 # # national MPA
 # MPA_med_national <-
 #   st_read("data/MPAnational_5m.gpkg", quiet = T) %>%
 #   st_transform('+proj=longlat +datum=WGS84')
 # 
-# # Nature 2000 site
+# # Natura 2000 site
 # MPA_med_NATURA2000 <-
 #   st_read("data/Nature2000_5m.gpkg", quiet = T) %>%
 #   st_transform('+proj=longlat +datum=WGS84')
