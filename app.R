@@ -673,6 +673,7 @@ server <- function(input, output, session) {
           "<b>Country: </b>", country, "<br>",
           "<b>Region: </b>", area, "<br>",
           "<b>Name: </b>", site, "<br>",
+          "<b>Site Type: </b>", site_type, "<br>",
           "<b>Depth: </b>", avg_depth, " m", "<br>"), 
         popupOptions = popupOptions(closeOnClick = TRUE),
         label = ~ as.character(site),
@@ -706,3 +707,4 @@ server <- function(input, output, session) {
 # run the application -----------------------------------------------------
 
 shinyApp(ui, server)
+
