@@ -669,10 +669,10 @@ server <- function(input, output, session) {
         color = "white",
         weight = 0.2,
         fillColor = "blue",
-        popup = ~ paste0(
+        popup = ~ paste(
+          "<h5>", site, "</h5>",
           "<b>Country: </b>", country, "<br>",
           "<b>Region: </b>", area, "<br>",
-          "<b>Name: </b>", site, "<br>",
           "<b>Site Type: </b>", site_type, "<br>",
           "<b>Depth: </b>", avg_depth, " m", "<br>"), 
         popupOptions = popupOptions(closeOnClick = TRUE),
