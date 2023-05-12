@@ -33,6 +33,7 @@ library(shinyWidgets)
 # database-systematic map
 data <- read.csv("data/database_selected.csv")
 
+
 # The layers related to the National MPA, Natura 2000 sites and Proposed
 # Natura 2000 sites can be visualized in the Shiny-app
 
